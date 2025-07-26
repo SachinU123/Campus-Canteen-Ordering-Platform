@@ -1,0 +1,138 @@
+ html,body{
+        height: 100%;
+        padding: 0;
+        margin: 0;
+    }
+
+    body{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background-color: rgb(34, 197, 94);
+    }
+
+       .page-container{
+        margin-top: 30px;
+        background-color: rgb(54, 54, 54);
+        padding-top: px;
+        padding-bottom: 20px;
+        padding-left: 45px;
+        padding-right: 45px;
+        border-radius: 15px;
+        position: relative;
+    }
+
+    .name{
+        padding-top: 4px;
+        padding-bottom: 4px;
+        border-radius: 8px;
+        border-style: solid;
+        margin-bottom: 8px;
+        border-color:black;
+    }
+
+    .pass{
+        padding-top: 4px;
+        padding-bottom: 4px;
+        border-radius: 8px;
+        border-style: solid;
+        border-color:black;
+;
+        margin-bottom: 5px;
+    }
+
+    .login-container {
+        text-align: center;
+        padding-bottom: 13px;
+    }
+
+    .btn-container{
+        display:flex;
+        justify-content:center;
+        margin-top: 20px;
+    }
+
+    .Submit-btn{
+        padding-top: 5px;
+        padding-bottom: 5px;
+        padding-left: 40px;
+        padding-right: 40px;
+        border-radius: 20px;
+        border-style: solid;
+        margin-bottom: 5px;
+        background-color:rgb(252, 211, 77);     
+    }
+
+    .fp-container{
+        display: flex;
+        justify-content: center;
+        margin-bottom: 10px;
+    }
+
+    .register-container{
+        display: flex;
+        justify-content: center;
+        margin-bottom: 0px;
+        height: 40px;
+    }
+
+    .terms-container{
+        display: flex;
+        justify-content: center;
+        height: 8px;
+    }
+
+    .Submit-btn:hover{
+        cursor: pointer;
+        opacity: 0.85;
+    }
+
+    .Submit-btn:active{
+        opacity: 0.7;
+    }
+
+    .forgot-password {
+        color:aqua;
+    }
+
+    .forgot-password:hover {
+        opacity: 0.5;        
+    }
+
+    .forgot-password:active {
+        opacity: 1;
+        color: rgb(224, 49, 49);
+    }
+
+    .Register {
+        color:aqua;
+    }
+
+    .Register:hover {
+        opacity: 0.5;
+    }
+
+    .Register:active {
+        opacity: 1;
+        color: rgb(224, 49, 49);
+    }
+
+    .terms-guidelines {
+        color: aqua;
+    }
+
+    .terms-guidelines:hover {
+        opacity: 0.5;
+    }
+
+    .terms-guidelines:active {
+        opacity: 1;
+        color: rgb(224, 49, 49);
+    }
+
+    .remember {
+        display:flex;
+        flex-direction: row;
+        align-items: center;
+    }
