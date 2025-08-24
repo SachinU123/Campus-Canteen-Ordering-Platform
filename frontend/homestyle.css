@@ -1,0 +1,237 @@
+/* Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+/* Body */
+body {
+  background-color: #111;
+  color: #fff;
+}
+
+/* Navbar */
+.navbar {
+  position: sticky;
+  top: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #000;
+  padding: 10px 20px;
+  z-index: 1000;
+  border-bottom: 2px solid #00ff80;
+}
+
+.loginnamecon {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.logo {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #00ff80;
+}
+
+.logo-img {
+    width: 30px;
+    height: 30px;
+}
+
+.search-bar{
+    display:flex;
+    align-items: center; 
+}
+
+.search-bar input {
+  padding: 8px 12px;
+  border-radius: 20px;
+  border: none;
+  outline: none;
+  width: 250px;
+}
+
+.search-bar:hover{
+  box-shadow: 0 0 20px #00ff80;
+}
+
+.nav-links a {
+  margin-left: 15px;
+  text-decoration: none;
+  color: #fff;
+  transition: color 0.3s ease;
+}
+
+.nav-links a:hover,
+.cart-btn {
+  color: #00ff80;
+  font-weight: bold;
+}
+
+/* Food Section */
+.food-section {
+  padding: 20px;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+  color: #00ff80;
+  text-shadow: 0 0 10px #00ff80;
+}
+
+.food-scroll-wrapper {
+  overflow-x: auto;
+  padding: 20px;
+}
+
+.food-scroll {
+  display: flex;
+  gap: 40px;
+  scroll-snap-type: x mandatory;
+  padding: 10px 10px 30px 10px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #00ff80 transparent;
+}
+
+.food-card {
+  flex: 0 0 auto;
+  width: 220px;
+  background: #222;
+  border-radius: 12px;
+  padding: 15px;
+  text-align: center;
+  scroll-snap-align: start;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.food-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 20px #00ff80;
+  z-index: 10;
+}
+
+.food-img {
+  width: 100%;
+  height: 140px;
+  background: #444;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.food-scroll::-webkit-scrollbar {
+  height: 8px;
+}
+
+.food-scroll::-webkit-scrollbar-thumb {
+  background-color: #00ff80;
+  border-radius: 10px;
+}
+
+.food-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+
+.price, .time, .rating {
+  margin: 5px 0;
+}
+
+.add-btn {
+  margin-top: 10px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 20px;
+  background: #00ff80;
+  color: #000;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.add-btn:hover {
+  background: #00cc66;
+}
+
+/* Chinese Grid Section */
+.food-sec {
+  padding: 20px;
+}
+
+.sec-tit {
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+  color: #00ff80;
+  text-shadow: 0 0 10px #00ff80;
+}
+
+/* Grid layout */
+.food-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* exactly 3 columns */
+  grid-template-rows: repeat(3, auto);   /* exactly 3 rows */
+  gap: 30px;
+  justify-items: center;  /* center the cards inside */
+}
+
+
+/* Reuse existing .food-card styling */
+.food-grid .food-card {
+  background: #222;
+  border-radius: 12px;
+  padding: 15px;
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.food-grid .food-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 20px #00ff80;
+}
+
+.food-grid .food-img {
+  width: 100%;
+  height: 140px;
+  background: #444;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+
+
+
+/* Footer */
+.footer {
+  background: #000;
+  padding: 20px;
+  text-align: center;
+  border-top: 2px solid #00ff80;
+}
+
+.footer-links a {
+  margin: 0 10px;
+  color: #fff;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.footer-links a:hover {
+  color: #00ff80;
+}
+
+.categories {
+  margin: 10px 0;
+  color: #aaa;
+}
+
+.footer p {
+  color: #888;
+  font-size: 0.9rem;
+}
