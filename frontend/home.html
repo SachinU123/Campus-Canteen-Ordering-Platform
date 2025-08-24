@@ -1,9 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vpp Canteen</title>
-    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
-    <link rel="stylesheet" type="text/css" href="style.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VPP Canteen</title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico" />
+    <link rel="stylesheet" type="text/css" href="style.css" />
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+
+    <!-- Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
 </head>
+<body>
+    <!-- Navigation Bar -->
+    <header class="navbar">
+        <div class="logo">
+            <img src="images/logo.png" alt="VPP Canteen Logo" />
+            <h1>VPP Canteen</h1>
+        </div>
+        <nav>
+            <ul class="nav-links">
+                <li><a href="home.html" class="active">Home</a></li>
+                <li><a href="menu.html">Menu</a></li>
+                <li><a href="orders.html">My Orders</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </nav>
+        <div class="cart-icon">
+            <span class="material-icons">shopping_cart</span>
+            <span class="cart-count">0</span>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h2>Order Your Favorite Food Instantly 🍔</h2>
+            <p>Fresh, tasty, and delivered in minutes. Enjoy our canteen specials every day!</p>
+            <a href="menu.html" class="order-btn">Explore Menu</a>
+        </div>
+        <div class="hero-img">
+            <img src="images/hero-food.png" alt="Delicious Food" />
+        </div>
+    </section>
+
+    <!-- Featured Items -->
+    <section class="featured">
+        <h2 class="section-title">Today's Specials ✨</h2>
+        <div class="menu-container">
+            <div class="menu-card">
+                <img src="images/burger.jpg" alt="Burger" />
+                <h3>Cheese Burger</h3>
+                <p>₹120</p>
+                <button class="order-btn">Order Now</button>
+            </div>
+            <div class="menu-card">
+                <img src="images/pizza.jpg" alt="Pizza" />
+                <h3>Margherita Pizza</h3>
+                <p>₹250</p>
+                <button class="order-btn">Order Now</button>
+            </div>
+            <div class="menu-card">
+                <img src="images/sandwich.jpg" alt="Sandwich" />
+                <h3>Grilled Sandwich</h3>
+                <p>₹80</p>
+                <button class="order-btn">Order Now</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2025 VPP Canteen | All Rights Reserved</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
