@@ -11,7 +11,7 @@
     }
 
     body {
-      background-image: url('images/blackfoodbg7.jpg');
+      background-image: url('assets/images/blackfoodbg7.jpg');
       background-color: black;
       background-size: cover;
       background-position: center;
@@ -31,7 +31,7 @@
     }
 
     .left-panel {
-      background-image: url('images/loginimagehc.png');
+      background-image: url('assets/images/loginimagehc.png');
       background-color: black; 
       background-size: cover;       
       background-repeat: no-repeat;  
