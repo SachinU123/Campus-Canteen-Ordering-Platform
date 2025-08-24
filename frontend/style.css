@@ -122,8 +122,8 @@ form input::placeholder {
 }
 
 form input:focus {
-  border-color: #ff6b6b;
-  box-shadow: 0 0 8px #ff6b6b;
+  border-color: #00e676;
+  box-shadow: 0 0 8px #00e676;
   transform: scale(1.02);
   background: rgba(255, 255, 255, 0.2);
 }
@@ -137,7 +137,7 @@ form input:focus {
 }
 
 .form-options a {
-  color: #ffbb6b;
+  color: rgb(9, 105, 214);
   text-decoration: none;
   transition: color 0.3s ease;
 }
@@ -148,7 +148,7 @@ form input:focus {
 
 /* Primary Button */
 .btn-primary {
-  background: linear-gradient(135deg, #ff6b6b, #ffbb6b);
+  background: linear-gradient(135deg, #00c853, #69f0ae);
   color: white;
   border: none;
   padding: 12px;
@@ -161,25 +161,7 @@ form input:focus {
 
 .btn-primary:hover {
   transform: scale(1.05);
-  box-shadow: 0 8px 20px rgba(255, 107, 107, 0.5);
-}
-
-/* Google Button */
-.btn-google {
-  background-color: white;
-  color: black;
-  border: 1px solid #ccc;
-  padding: 12px;
-  width: 100%;
-  border-radius: 8px;
-  font-size: 15px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-google:hover {
-  background-color: #f1f1f1;
-  transform: scale(1.03);
+  box-shadow: 0 8px 20px #00e676;
 }
 
 /* Divider */
@@ -201,7 +183,7 @@ form input:focus {
 .signup-text a {
   text-decoration: none;
   font-weight: 600;
-  color: #ffbb6b;
+  color: rgb(9, 122, 214);
   transition: color 0.3s ease;
 }
 
