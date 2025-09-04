@@ -1,0 +1,79 @@
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #000;
+      color: #eee;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    
+
+    /* Filter Buttons */
+    .filters {
+      display: flex;
+      gap: 0.5rem;
+      margin: 1rem;
+    }
+    .filters button {
+      padding: 0.5rem 1rem;
+      border-radius: 999px;
+      border: none;
+      background: #111;
+      color: #0f0;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.3s;
+    }
+    .filters button:hover,
+    .filters button.active {
+      background: #0f0;
+      color: #000;
+      transform: scale(1.05);
+    }
+
+    /* Booklet */
+    .book {
+      position: relative;
+      width: 80%;
+      height: 70%;
+      perspective: 2000px;
+    }
+    .page {
+      width: 50%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      transition: transform 1s ease;
+      transform-origin: left;
+      background: #111;
+      padding: 1.5rem;
+      box-sizing: border-box;
+      overflow-y: auto;
+      box-shadow: 0 0 15px rgba(0,255,0,0.3);
+    }
+    .page.right { left: 50%; transform-origin: left; }
+    .page.left { left: 0; transform-origin: right; }
+
+    .page h2 {
+      margin-top: 0;
+      color: #0f0;
+      border-bottom: 1px solid #0f0;
+      padding-bottom: 0.3rem;
+    }
+
+    .item { margin: 0.5rem 0; display: flex; justify-content: space-between; }
+
+    /* Hidden/visible states */
+    .flipped { transform: rotateY(-180deg); }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .book { width: 95%; height: 80%; }
+      .page { width: 100%; left: 0; transform-origin: center; }
+      .page.right { display: none; }
+    }

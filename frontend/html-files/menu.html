@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="../css-files/menu.css">
+  <link rel="stylesheet" href="../css-files/cart.css">
+  <title>Vpp Canteen - Menu</title>
+
+</head>
+<body>
+    <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <a class="brand" href="#">
+        <span class="brand-icon">
+          <!-- leaf / flame hybrid -->
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#02150d" aria-hidden="true">
+            <path d="M12 2c2.6 3.6.9 6.7-1.4 8.7 1.5-.3 3-.9 4.2-2 2.7 3.5 1.4 8.8-3.5 10.9-5.8-2.2-7.3-7.8-4-11.5C6.8 7.2 8.9 6 12 2z" fill="currentColor"/>
+          </svg>
+        </span>
+        <div class="brand-name">VPP Canteen</div>
+      </a>
+
+      <nav class="nav" aria-label="Primary">
+        <a class="tab" href="#">Home</a>
+        <a class="tab" href="#">Menu</a>
+        <a class="tab" href="#">Orders</a>
+        <a class="tab active" href="#">Cart <span class="badge">3</span></a>
+      </nav>
+    </div>
+  </header> 
+
+  <!-- Filters -->
+  <div class="filters">
+    <button class="active" onclick="filterItems('all')">All</button>
+    <button onclick="filterItems('breakfast')">Breakfast</button>
+    <button onclick="filterItems('meals')">Meals</button>
+    <button onclick="filterItems('snacks')">Snacks</button>
+    <button onclick="filterItems('beverages')">Beverages</button>
+  </div>
+
+  <!-- Booklet -->
+  <div class="book" onclick="turnPage(event)">
+    <div class="page left" id="page1">
+      <h2>Breakfast</h2>
+      <div class="item breakfast"><span>Pancakes</span><span>₹120</span></div>
+      <div class="item breakfast"><span>Omelette</span><span>₹100</span></div>
+      <div class="item breakfast"><span>Toast & Butter</span><span>₹80</span></div>
+
+      <h2>Meals</h2>
+      <div class="item meals"><span>Veg Thali</span><span>₹200</span></div>
+      <div class="item meals"><span>Chicken Curry</span><span>₹250</span></div>
+      <div class="item meals"><span>Paneer Masala</span><span>₹220</span></div>
+    </div>
+
+    <div class="page right" id="page2">
+      <h2>Snacks</h2>
+      <div class="item snacks"><span>Samosa</span><span>₹40</span></div>
+      <div class="item snacks"><span>French Fries</span><span>₹90</span></div>
+      <div class="item snacks"><span>Burger</span><span>₹120</span></div>
+
+      <h2>Beverages</h2>
+      <div class="item beverages"><span>Tea</span><span>₹30</span></div>
+      <div class="item beverages"><span>Coffee</span><span>₹50</span></div>
+      <div class="item beverages"><span>Lassi</span><span>₹60</span></div>
+    </div>
+  </div>
+
+  <script>
+    let flipped = false;
+    function turnPage(e) {
+      const book = document.querySelector('.book');
+      const right = document.getElementById('page2');
+      if (!flipped && e.offsetX > book.clientWidth / 2) {
+        right.classList.add('flipped');
+        flipped = true;
+      } else if (flipped && e.offsetX < book.clientWidth / 2) {
+        right.classList.remove('flipped');
+        flipped = false;
+      }
+    }
+
+    function filterItems(category) {
+      document.querySelectorAll('.filters button').forEach(b=>b.classList.remove('active'));
+      event.target.classList.add('active');
+      document.querySelectorAll('.item').forEach(item => {
+        if (category === 'all' || item.classList.contains(category)) {
+          item.style.display = 'flex';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    }
+  </script>
+</body>
+</html>

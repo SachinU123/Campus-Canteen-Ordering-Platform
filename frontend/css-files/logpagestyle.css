@@ -128,12 +128,16 @@ form input:focus {
   background: rgba(255, 255, 255, 0.2);
 }
 
+#password {
+  margin-bottom: 5px;
+}
+
 /* Form Options */
 .form-options {
   display: flex;
   justify-content: flex-end;
   margin-bottom: 25px;
-  font-size: 13px;
+  font-size: 15px;
 }
 
 .form-options a {
