@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>VPP Canteen — Orders</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../css-files/orders.css">
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <a class="brand" href="#">
+        <span class="brand-icon" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#02150d" aria-hidden="true">
+            <path d="M12 2c2.6 3.6.9 6.7-1.4 8.7 1.5-.3 3-.9 4.2-2 2.7 3.5 1.4 8.8-3.5 10.9-5.8-2.2-7.3-7.8-4-11.5C6.8 7.2 8.9 6 12 2z" fill="currentColor"/>
+          </svg>
+        </span>
+        <span class="brand-name">VPP Canteen</span>
+      </a>
+      <nav class="nav" aria-label="Primary">
+        <a class="tab" href="#">Home</a>
+        <a class="tab" href="#">Menu</a>
+        <a class="tab active" href="#">Orders</a>
+        <a class="tab" href="#">Cart</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <h1 class="title">📦 Orders</h1>
+
+    <!-- CSS-only Tabs -->
+    <section class="tabs">
+      <!-- radios -->
+      <input type="radio" name="ordersTab" id="tab-live" checked>
+      <input type="radio" name="ordersTab" id="tab-prev">
+
+      <!-- segmented control -->
+      <div class="tab-track">
+        <label class="tab-btn" for="tab-live">Live Orders</label>
+        <label class="tab-btn" for="tab-prev">Previous Orders</label>
+      </div>
+
+      <!-- tabbed content (keep ONLY these two sections) -->
+      <div class="tabs-content">
+
+        <!-- LIVE -->
+        <section id="live" class="orders-list">
+
+          <article class="order-card">
+            <div>
+              <div class="order-head">
+                <div>
+                  <strong>Order #1023</strong>
+                  <div class="order-meta">Chicken Dum Biryani × 1 • Iced Cold Coffee × 1</div>
+                </div>
+                <span class="order-status status-live">Preparing</span>
+              </div>
+              <ul class="order-items">
+                <li>Chicken Dum Biryani × 1</li>
+                <li>Iced Cold Coffee × 1</li>
+              </ul>
+              <div class="order-total">Total: ₹459</div>
+            </div>
+
+            <!-- Progress (set --pct to your static % ) -->
+            <aside class="progress-col">
+              <div class="progress-wrap" style="--pct:40%;">
+                <div class="progress-fill"></div>
+                <div class="progress-glow"></div>
+                <div class="percent-chip">40%</div>
+              </div>
+            </aside>
+          </article>
+
+          <article class="order-card">
+            <div>
+              <div class="order-head">
+                <div>
+                  <strong>Order #1024</strong>
+                  <div class="order-meta">Veg Thali × 2</div>
+                </div>
+                <span class="order-status status-live">Out for Delivery</span>
+              </div>
+              <ul class="order-items">
+                <li>Veg Thali × 2</li>
+              </ul>
+              <div class="order-total">Total: ₹400</div>
+            </div>
+
+            <aside class="progress-col">
+              <div class="progress-wrap" style="--pct:80%;">
+                <div class="progress-fill"></div>
+                <div class="progress-glow"></div>
+                <div class="percent-chip">80%</div>
+              </div>
+            </aside>
+          </article>
+
+        </section>
+
+        <!-- PREVIOUS -->
+        <section id="previous" class="orders-list">
+          <article class="order-card">
+            <div>
+              <div class="order-head">
+                <div>
+                  <strong>Order #1008</strong>
+                  <div class="order-meta">Chili Paneer × 1 • Lassi × 2</div>
+                </div>
+                <span class="order-status status-complete">Completed</span>
+              </div>
+              <ul class="order-items">
+                <li>Chili Paneer × 1</li>
+                <li>Lassi × 2</li>
+              </ul>
+              <div class="order-total">Total: ₹279</div>
+            </div>
+
+            <aside class="progress-col">
+              <div class="progress-wrap" style="--pct:100%;">
+                <div class="progress-fill"></div>
+                <div class="progress-glow"></div>
+                <div class="percent-chip">100%</div>
+              </div>
+            </aside>
+          </article>
+        </section>
+
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="links">
+        <a href="#">About Us</a>
+        <a href="#">Help</a>
+        <a href="#">Terms &amp; Conditions</a>
+      </div>
+      <div>© 2025 VPP Canteen</div>
+    </div>
+  </footer>
+
+</body>
+</html>
