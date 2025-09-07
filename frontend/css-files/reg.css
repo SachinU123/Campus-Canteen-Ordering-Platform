@@ -12,7 +12,7 @@ html, body {
 
 /* Background */
 body {
-  background-image: url('assets/images/blackfoodbg7.jpg');
+  background-image: url('../assets/images/blackfoodbg7.jpg');
   background-size: cover;
   background-position: center;
   display: flex;
@@ -42,7 +42,7 @@ body {
 
 /* Left Panel */
 .left-panel {
-  background-image: url('assets/images/loginimagehc.png');
+  background-image: url('../assets/images/loginimagehc.png');
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;

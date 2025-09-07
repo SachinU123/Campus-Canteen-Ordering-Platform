@@ -12,7 +12,7 @@ html, body {
 
 /* Background with floating animation */
 body {
-  background-image: url('assets/images/blackfoodbg7.jpg');
+  background-image: url('../assets/images/blackfoodbg7.jpg');
   background-color: black;
   background-size: cover;
   background-position: center;
@@ -43,7 +43,7 @@ body {
 
 /* Left Panel */
 .left-panel {
-  background-image: url('assets/images/loginimagehc.png');
+  background-image: url('../assets/images/loginimagehc.png');
   background-color: black;
   background-size: cover;
   background-repeat: no-repeat;
