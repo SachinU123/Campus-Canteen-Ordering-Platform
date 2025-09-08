@@ -1,24 +1,22 @@
-/* cart.js — VPP Canteen
-   - Renders cart from localStorage (fallback: parse current HTML)
-   - Quantity +/- , Remove
-   - Order Summary keeps in sync
-   - Proceed to Payment -> saves a pending order snapshot for Orders page, then clears cart & redirects
-   - Header tab routing + badge
-*/
-
 (function () {
-  // ------------------ Utilities ------------------
-  const $  = (sel, ctx = document) => ctx.querySelector(sel);
-  const $$ = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
+  // ------------------ Config ------------------
+  const API_BASE = "http://localhost:3001"; // change to deployed backend later
+  const CURRENCY     = "₹";
+  const PLATFORM_FEE = 0; // rupees
+  const TAX_RATE     = 0; // e.g. 0.05 for 5%
 
   const CART_KEY    = "vpp_canteen_cart";
   const PENDING_KEY = "vpp_pending_order";
 
-  const CURRENCY     = "₹";
-  const PLATFORM_FEE = 0; // change easily later (in rupees)
-  const TAX_RATE     = 0; // e.g. 0.05 for 5% tax, if you add a UI row
+  // ------------------ Utilities ------------------
+  const $  = (sel, ctx = document) => ctx.querySelector(sel);
+  const $$ = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
 
-  const INR = (n) => `${CURRENCY}${Number(n || 0).toFixed(0)}`;
+  const INR      = (n) => `${CURRENCY}${Number(n || 0).toFixed(0)}`;
+  const sumItems = (cart) => cart.reduce((s, it) => s + (it.price * it.qty), 0);
+  const totalQty = (cart) => cart.reduce((s, it) => s + it.qty, 0);
+  const safeId   = (name, price) =>
+    `${(name || "item").toLowerCase().replace(/\s+/g, "-")}--${Number(price || 0)}`;
 
   function parsePriceText(text) {
     const n = (text || "").replace(/[^\d.]/g, "");
@@ -26,11 +24,8 @@
   }
 
   function readCart() {
-    try {
-      return JSON.parse(localStorage.getItem(CART_KEY)) || [];
-    } catch {
-      return [];
-    }
+    try { return JSON.parse(localStorage.getItem(CART_KEY)) || []; }
+    catch { return []; }
   }
 
   function writeCart(cart) {
@@ -38,9 +33,9 @@
     updateBadge(cart);
   }
 
-  const sumItems  = (cart) => cart.reduce((s, it) => s + (it.price * it.qty), 0);
-  const totalQty  = (cart) => cart.reduce((s, it) => s + it.qty, 0);
-  const safeId    = (name, price) => `${(name || "item").toLowerCase().replace(/\s+/g, "-")}--${Number(price || 0)}`;
+  function escapeHtml(s = "") {
+    return s.replace(/[&<>"']/g, (m) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
+  }
 
   // --- Pending order snapshot for Orders page ---
   function savePendingOrderSnapshot() {
@@ -48,7 +43,7 @@
       name:  it.name,
       qty:   it.qty  || 1,
       price: it.price || 0,
-      time:  it.time || "" // e.g. "20–25 mins"
+      time:  it.time || ""
     }));
     if (!items.length) return;
     localStorage.setItem(PENDING_KEY, JSON.stringify({
@@ -71,7 +66,7 @@
       const img   = $(".thumb img", el)?.getAttribute("src") || "";
       const alt   = $(".thumb img", el)?.getAttribute("alt") || name;
       const meta  = $(".meta", el)?.textContent?.trim() || "";
-      const time  = $(".time", el)?.textContent?.trim() || ""; // capture prep-time for better ETA in Orders
+      const time  = $(".time", el)?.textContent?.trim() || "";
       const veg   = !!$(".veg-dot", el);
       items.push({
         id: safeId(name, price),
@@ -85,30 +80,6 @@
   }
 
   // ------------------ Rendering ------------------
-  function renderCart() {
-    const container = $(".items");
-    if (!container) return;
-
-    const cart = readCart();
-
-    // Empty state
-    if (cart.length === 0) {
-      container.innerHTML = `
-        <div class="card" style="padding:24px; text-align:center">
-          <p class="muted" style="margin-bottom:10px">Your cart is empty.</p>
-          <a class="btn" href="menu.html" style="display:inline-block">Browse Menu</a>
-        </div>
-      `;
-      updateSummary(cart);
-      updateBadge(cart);
-      return;
-    }
-
-    container.innerHTML = cart.map(itemHTML).join("");
-    updateSummary(cart);
-    updateBadge(cart);
-  }
-
   function itemHTML(it) {
     const vegDot = it.veg
       ? `<span class="veg-dot" aria-hidden="true"></span>`
@@ -156,14 +127,33 @@
     `;
   }
 
-  function escapeHtml(s = "") {
-    return s.replace(/[&<>"']/g, (m) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
+  function renderCart() {
+    const container = $(".items");
+    if (!container) return;
+
+    const cart = readCart();
+
+    if (cart.length === 0) {
+      container.innerHTML = `
+        <div class="card" style="padding:24px; text-align:center">
+          <p class="muted" style="margin-bottom:10px">Your cart is empty.</p>
+          <a class="btn" href="menu.html" style="display:inline-block">Browse Menu</a>
+        </div>
+      `;
+      updateSummary(cart);
+      updateBadge(cart);
+      return;
+    }
+
+    container.innerHTML = cart.map(itemHTML).join("");
+    updateSummary(cart);
+    updateBadge(cart);
   }
 
   // ------------------ Order Summary ------------------
   function updateSummary(cart) {
     const itemsCountEl = $(".summary .head .muted");
-    const totals = $$(".summary .split strong"); // safer: last strong is "Payable now"
+    const totals = $$(".summary .split strong");
     const itemsTotalEl = totals[0] || null;
     const payableEl    = totals[totals.length - 1] || itemsTotalEl;
 
@@ -202,7 +192,26 @@
     renderCart();
   }
 
-  // ------------------ Payment Modal (Placeholder) ------------------
+  // ------------------ Small fetch helper with timeout + logging ------------------
+  async function fetchJSON(url, opts = {}, timeoutMs = 10000) {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), timeoutMs);
+    try {
+      console.log("➡️  Fetch:", url, opts);
+      const res = await fetch(url, { ...opts, signal: ctrl.signal });
+      console.log("⬅️  Response status:", res.status, res.statusText);
+      const data = await res.json().catch(() => ({}));
+      console.log("📦 JSON:", data);
+      return { ok: res.ok, data };
+    } catch (err) {
+      console.error("❌ fetchJSON error:", err);
+      return { ok: false, data: null, err };
+    } finally {
+      clearTimeout(t);
+    }
+  }
+
+  // ------------------ Payment Modal (Dummy Gateway) ------------------
   function ensurePaymentModal() {
     let modal = $("#pay-modal");
     if (modal) return modal;
@@ -217,20 +226,16 @@
            style="background:#fff;max-width:520px;width:92%;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:hidden">
         <div style="padding:18px 18px 0">
           <h3 id="pay-title" style="margin:0 0 8px;font-family:Poppins,Inter,sans-serif">Choose Payment Method</h3>
-          <p class="muted" style="margin:0 0 12px">This is a placeholder. Integrate Razorpay/Stripe later.</p>
+          <p class="muted" style="margin:0 0 12px">Demo checkout (no real payment).</p>
         </div>
         <div style="padding:0 18px 18px; display:grid; gap:10px">
           <label style="display:flex;gap:10px;align-items:center;cursor:pointer">
             <input type="radio" name="pay" value="upi" checked>
-            <span>UPI (Gpay / PhonePe / BHIM)</span>
+            <span>UPI (GPay / PhonePe / BHIM)</span>
           </label>
           <label style="display:flex;gap:10px;align-items:center;cursor:pointer">
             <input type="radio" name="pay" value="card">
             <span>Card (Visa / MasterCard / RuPay)</span>
-          </label>
-          <label style="display:flex;gap:10px;align-items:center;cursor:pointer">
-            <input type="radio" name="pay" value="cod" disabled>
-            <span>Cash on Delivery (Not available)</span>
           </label>
           <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
             <button id="pay-cancel" class="btn" style="background:#fff;border:1px solid #e5e7eb;color:#111827;border-radius:10px;padding:8px 12px;cursor:pointer">Cancel</button>
@@ -241,39 +246,81 @@
     `;
     document.body.appendChild(modal);
 
-    // Close by backdrop
-    modal.addEventListener("click", (e) => {
-      if (e.target === modal) hidePaymentModal();
-    });
+    // Cancel + backdrop close
+    modal.addEventListener("click", (e) => { if (e.target === modal) hidePaymentModal(); });
     $("#pay-cancel", modal).addEventListener("click", hidePaymentModal);
 
-    // Bind Pay Now once
+    // Bind Pay Now
     const payNow = $("#pay-now", modal);
     if (!payNow.dataset.bound) {
-      payNow.addEventListener("click", () => {
-        const cart = readCart();
-        if (!cart.length) {
-          alert("Your cart is empty.");
-          hidePaymentModal();
-          return;
-        }
-
-        // 1) Save snapshot for Orders page (so Orders can build an accurate live order)
-        savePendingOrderSnapshot();
-
-        // 2) Optional: store last order summary counters
-        localStorage.setItem("vpp_last_order_total", String(sumItems(cart)));
-        localStorage.setItem("vpp_last_order_count", String(totalQty(cart)));
-
-        // 3) Clear cart & redirect
-        writeCart([]);
-        hidePaymentModal();
-        window.location.href = "orders.html";
-      });
+      payNow.addEventListener("click", onPayNowClick);
       payNow.dataset.bound = "1";
     }
 
     return modal;
+  }
+
+  let paying = false; // prevent double-click
+
+  async function onPayNowClick() {
+    if (paying) return;
+    paying = true;
+
+    try {
+      const cart = readCart();
+      if (!cart.length) { alert("Your cart is empty."); return; }
+
+      if (!navigator.onLine) {
+        console.warn("🌐 Offline detected");
+        alert("You appear to be offline. Please check your internet.");
+        return;
+      }
+
+      const rupees = Math.round(sumItems(cart));
+
+      // 1) Ask backend for a dummy order
+      const { ok, data, err } = await fetchJSON(`${API_BASE}/api/create-order`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount: rupees })
+      }, 10000);
+
+      if (!ok || !data || !data.orderId) {
+        console.warn("⚠️ No valid order response:", data, err);
+        alert("Could not create order. Check backend (CORS / server down).");
+        return;
+      }
+
+      // 2) Simulate checkout (no SDK)
+      const confirmed = confirm(
+        `Dummy Payment\n\nOrder: ${data.orderId}\nAmount: ₹${rupees}\n\nPress OK to simulate success.`
+      );
+      if (!confirmed) {
+        console.log("🟡 Dummy payment cancelled by user");
+        alert("Dummy payment cancelled.");
+        return;
+      }
+
+      // 3) Fake verification
+      const ver = await fetchJSON(`${API_BASE}/api/verify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: data.orderId })
+      }, 10000);
+
+      if (ver.ok && ver.data && ver.data.verified) {
+        console.log("✅ Payment verified (dummy). Saving snapshot & redirecting…");
+        savePendingOrderSnapshot();
+        writeCart([]);
+        hidePaymentModal();
+        window.location.href = "orders.html";
+      } else {
+        console.error("❌ Dummy verification failed:", ver);
+        alert("Dummy verification failed.");
+      }
+    } finally {
+      paying = false;
+    }
   }
 
   function showPaymentModal() {
@@ -291,7 +338,7 @@
 
   // ------------------ Events (delegated) ------------------
   function onClick(e) {
-    // Quantity buttons
+    // Quantity
     const incBtn = e.target.closest(".btn-icon[data-action='inc']");
     const decBtn = e.target.closest(".btn-icon[data-action='dec']");
     if (incBtn || decBtn) {
@@ -303,7 +350,7 @@
       return;
     }
 
-    // Remove
+    // Remove item
     const removeBtn = e.target.closest(".remove");
     if (removeBtn) {
       const itemEl = e.target.closest(".cart-item");
@@ -327,16 +374,16 @@
     if (tab) {
       e.preventDefault();
       const text = tab.textContent.trim().toLowerCase();
-      if (text.startsWith("index"))   window.location.href = "../index.html";
-      else if (text.startsWith("menu"))   window.location.href = "menu.html";
-      else if (text.startsWith("orders")) window.location.href = "orders.html";
-      else if (text.startsWith("cart"))   window.location.href = "cart.html";
-      else window.location.href = "../index.html";
+      if (text.startsWith("index"))         window.location.href = "../index.html";
+      else if (text.startsWith("menu"))     window.location.href = "menu.html";
+      else if (text.startsWith("orders"))   window.location.href = "orders.html";
+      else if (text.startsWith("cart"))     window.location.href = "cart.html";
+      else                                  window.location.href = "../index.html";
       return;
     }
   }
 
-  // Keyboard support for +/- inside a .cart-item
+  // Keyboard support
   function onKeydown(e) {
     if (!document.activeElement) return;
     const inItem = document.activeElement.closest?.(".cart-item");
@@ -346,27 +393,27 @@
     if (!id) return;
 
     if (e.key === "+" || e.key === "=") {
-      e.preventDefault();
-      changeQty(id, +1);
+      e.preventDefault(); changeQty(id, +1);
     } else if (e.key === "-" || e.key === "_") {
-      e.preventDefault();
-      changeQty(id, -1);
+      e.preventDefault(); changeQty(id, -1);
     } else if (e.key === "Delete") {
-      e.preventDefault();
-      removeItem(id);
+      e.preventDefault(); removeItem(id);
     }
   }
 
   // ------------------ Init ------------------
   function init() {
-    seedCartFromDOMIfNeeded(); // if localStorage empty, read from current HTML
+    seedCartFromDOMIfNeeded();
     renderCart();
-
     document.addEventListener("click", onClick);
     document.addEventListener("keydown", onKeydown);
-
-    // Ensure badge shows correctly even if header differs
     updateBadge();
+
+    // Quick ping to backend to surface CORS / network issues early
+    fetchJSON(`${API_BASE}/api/health`).then(({ ok, data }) => {
+      if (ok) console.log("🩺 Backend health:", data);
+      else console.warn("⚠️ Backend health check failed");
+    });
   }
 
   if (document.readyState === "loading") {

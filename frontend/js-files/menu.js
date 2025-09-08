@@ -45,7 +45,7 @@
       else if (txt.startsWith("menu")) window.location.href = "menu.html";
       else if (txt.startsWith("orders")) window.location.href = "orders.html";
       else if (txt.startsWith("cart")) window.location.href = "cart.html";
-      else window.location.href = "../ndex.html";
+      else window.location.href = "../index.html";
     });
   }
 

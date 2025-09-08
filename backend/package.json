@@ -1,0 +1,29 @@
+{
+  "name": "online-canteen-order",
+  "version": "1.0.0",
+  "description": "",
+  "type": "commonjs",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SachinU123/Campus-Canteen-Ordering-Platform.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SachinU123/Campus-Canteen-Ordering-Platform/issues"
+  },
+  "homepage": "https://github.com/SachinU123/Campus-Canteen-Ordering-Platform#readme",
+  "dependencies": {
+    "body-parser": "^1.20.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.21.2",
+    "razorpay": "^2.9.6"
+  }
+}
