@@ -45,11 +45,11 @@
       if (!tab) return;
       e.preventDefault();
       const txt = tab.textContent.trim().toLowerCase();
-      if (txt.startsWith("home")) window.location.href = "home.html";
+      if (txt.startsWith("index")) window.location.href = "../index.html";
       else if (txt.startsWith("menu")) window.location.href = "menu.html";
       else if (txt.startsWith("orders")) window.location.href = "orders.html";
       else if (txt.startsWith("cart")) window.location.href = "cart.html";
-      else window.location.href = "home.html";
+      else window.location.href = "../index.html";
     });
   }
 

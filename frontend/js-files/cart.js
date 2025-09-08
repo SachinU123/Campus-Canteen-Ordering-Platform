@@ -327,11 +327,11 @@
     if (tab) {
       e.preventDefault();
       const text = tab.textContent.trim().toLowerCase();
-      if (text.startsWith("home"))   window.location.href = "home.html";
+      if (text.startsWith("index"))   window.location.href = "../index.html";
       else if (text.startsWith("menu"))   window.location.href = "menu.html";
       else if (text.startsWith("orders")) window.location.href = "orders.html";
       else if (text.startsWith("cart"))   window.location.href = "cart.html";
-      else window.location.href = "home.html";
+      else window.location.href = "../index.html";
       return;
     }
   }
