@@ -220,9 +220,6 @@
     filter: drop-shadow(0 0 4px rgba(255,215,0,0.6)); /* glowing effect */
     }
 
-    
-
-
     /* Footer */
     .footer{
       margin-top:36px; border-top:1px solid var(--line);

@@ -83,6 +83,27 @@ if (USE_DUMMY) {
     }
   });
 
+  // ---------------- Time endpoint (authoritative clock) ----------------
+  app.get("/api/now", (_req, res) => {
+    const nowUtcMs = Date.now();
+    // Create a formatted IST string (just for human readability/logs)
+    const istString = new Date(nowUtcMs).toLocaleString("en-IN", {
+      timeZone: "Asia/Kolkata",
+      hour12: false,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit"
+    });
+    res.json({
+      nowUtcMs,
+      istString,
+      tz: "Asia/Kolkata"
+    });
+  });
+
   app.post("/api/verify", (req, res) => {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body || {};
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
