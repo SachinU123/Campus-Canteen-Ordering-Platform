@@ -84,15 +84,21 @@
     return users.some(u => (u.email || "").toLowerCase() === email.toLowerCase());
   }
 
-  function createUser({ name, email, password }) {
-    const users = readJSON(USERS_KEY, []);
-    users.push({ name, email, pass: hash(password) });
-    writeJSON(USERS_KEY, users);
+  async function createUser({ name, email, password }) {
+  const res = await fetch("http://localhost:3000/api/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ full_name: name, email, password })
+  });
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.message || "Registration failed");
   }
 
-  function startSession(email) {
-    writeJSON(SESSION_KEY, { email, loginAt: Date.now() });
-  }
+  return res.json();
+}
+
 
   // ---------- Init ----------
   function init() {
@@ -122,7 +128,7 @@
       conf.value === pass.value ? removeError(conf) : insertError(conf, "Passwords do not match.");
     });
 
-    form.addEventListener("submit", (e) => {
+    form.addEventListener("submit"), (e) => {
       e.preventDefault();
 
       // reset errors
@@ -154,26 +160,37 @@
         btn.textContent = "Creating account…";
       }
 
-      // Simulated async work
-      setTimeout(() => {
-        try {
-          createUser({ name: nv, email: ev, password: pv });
-          startSession(ev);
-          toast("Account created!");
-          window.location.href = "home.html"; // or login.html if you prefer
-        } catch (err) {
-          toast("Could not create account");
-          insertError(email, "Something went wrong. Please try again.");
-        } finally {
-          if (btn) {
-            btn.disabled = false;
-            btn.textContent = original || "Sign Up";
-          }
-        }
-      }, 450);
-    });
-  }
+    // Real async work (backend API)
+    (async () => {
+      try {
+        await createUser({ name: nv, email: ev, password: pv });
+        toast("Account created!");
 
+        // optional auto-login
+        const loginRes = await fetch("http://localhost:3000/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: ev, password: pv })
+        });
+
+        if (loginRes.ok) {
+          const data = await loginRes.json();
+          writeJSON(SESSION_KEY, { token: data.token, user: data.user, loginAt: Date.now() });
+        }
+
+        window.location.href = "home.html"; // or login.html if you prefer
+      } catch (err) {
+        toast("Could not create account");
+        insertError(email, err.message || "Something went wrong. Please try again.");
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = original || "Sign Up";
+        }
+      }
+    })();
+    }
+  }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
   else init();
 })();

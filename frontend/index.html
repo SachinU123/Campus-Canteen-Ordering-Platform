@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Vpp Canteen - Home</title>
+  <link rel="stylesheet" href="css-files/homestyle.css"/>
+  <link rel="stylesheet" href="css-files/menu.css">
+  <script src="js-files/home.js" defer></script>
+  <script src="js-files/food-items.js" defer></script>
+</head>
+<body>
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="loginnamecon">
+      <img src="assets/images/LOGO.png" class="logo-img" alt="Vpp Canteen Logo"/>
+      <div class="logo">Vpp Canteen</div>
+    </div>
+
+    <div class="search-bar">
+      <input type="text" placeholder="Search"/>
+      <div aria-hidden="true">🎙️</div>
+    </div>
+
+    <!-- Hamburger (mobile) -->
+    <button class="hamburger" aria-label="Open Menu" aria-expanded="false">☰</button>
+
+    <nav class="nav-links" aria-label="Primary">
+      <a href="index.html">Home</a>
+      <a href="html-files/menu.html">Menu</a>
+      <a href="html-files/orders.html">Orders</a>
+      <a href="html-files/cart.html" class="cart-btn">🛒 Cart</a>
+    </nav>
+  </header>
+
+  <!-- Food Scrolling Section -->
+  <section class="food-section">
+    <h2 class="section-title">🔥 Top Picks</h2>
+
+    <div class="food-scroll-wrapper">
+      <div class="food-scroll">
+        <!-- Food Card (Top Picks use square thumbs) -->
+        <div class="food-card">
+          <div class="food-img"></div>
+          <h3>Veg Noodles</h3>
+          <p class="price">₹200</p>
+          <p class="time">⏱ 20-25 mins</p>
+          <p class="rating">⭐ 4.5</p>
+          <button class="add-btn">Add to Cart</button>
+        </div>
+
+        <div class="food-card">
+          <div class="food-img1"></div>
+          <h3>Kolhapuri Biryani</h3>
+          <p class="price">₹120</p>
+          <p class="time">⏱ 10-15 mins</p>
+          <p class="rating">⭐ 4.5</p>
+          <button class="add-btn">Add to Cart</button>
+        </div>
+
+        <div class="food-card">
+          <div class="food-img2"></div>
+          <h3>Pav Bhaji</h3>
+          <p class="price">₹150</p>
+          <p class="time">⏱ 25-30 mins</p>
+          <p class="rating">⭐ 4.5</p>
+          <button class="add-btn">Add to Cart</button>
+        </div>
+
+        <div class="food-card">
+          <div class="food-img3"></div>
+          <h3>Dahi Wada</h3>
+          <p class="price">₹99</p>
+          <p class="time">⏱ 20-25 mins</p>
+          <p class="rating">⭐ 4.5</p>
+          <button class="add-btn">Add to Cart</button>
+        </div>
+
+        <div class="food-card">
+          <div class="food-img4"></div>
+          <h3>Idli</h3>
+          <p class="price">₹99</p>
+          <p class="time">⏱ 20-25 mins</p>
+          <p class="rating">⭐ 4.5</p>
+          <button class="add-btn">Add to Cart</button>
+        </div>
+
+        <div class="food-card">
+          <div class="food-img5"></div>
+          <h3>Dosa</h3>
+          <p class="price">₹99</p>
+          <p class="time">⏱ 20-25 mins</p>
+          <p class="rating">⭐ 4.5</p>
+          <button class="add-btn">Add to Cart</button>
+        </div>
+
+        <div class="food-card">
+          <div class="food-img6"></div>
+          <h3>Paneer Biryani</h3>
+          <p class="price">₹99</p>
+          <p class="time">⏱ 20-25 mins</p>
+          <p class="rating">⭐ 4.5</p>
+          <button class="add-btn">Add to Cart</button>
+        </div>
+
+        <div class="food-card">
+          <div class="food-img7"></div>
+          <h3>Vada</h3>
+          <p class="price">₹99</p>
+          <p class="time">⏱ 20-25 mins</p>
+          <p class="rating">⭐ 4.5</p>
+          <button class="add-btn">Add to Cart</button>
+        </div>
+
+        <div class="food-card">
+          <div class="food-img8"></div>
+          <h3>Vada Pav</h3>
+          <p class="price">₹15</p>
+          <p class="time">⏱ 5 -10 mins</p>
+          <p class="rating">⭐ 4.8</p>
+          <button class="add-btn">Add to Cart</button>
+        </div>
+
+        <div class="food-card">
+          <div class="food-img9"></div>
+          <h3>Paneer Biryani</h3>
+          <p class="price">₹99</p>
+          <p class="time">⏱ 20-25 mins</p>
+          <p class="rating">⭐ 4.5</p>
+          <button class="add-btn">Add to Cart</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Chinese Section -->
+  <section class="food-sec">
+    <h2 class="sec-tit">Chinese</h2>
+
+    <!-- 3x3 on desktop, 2 cols tablet, 1 col mobile -->
+    <div class="food-grid-large">
+      <div class="food-card">
+        <div class="food-img10"></div>
+        <h3>Item Name</h3>
+        <p class="price">₹99</p>
+        <p class="time">⏱ 20-25 mins</p>
+        <p class="rating">⭐ 4.5</p>
+        <button class="add-btn">Add to Cart</button>
+      </div>
+
+      <div class="food-card">
+        <div class="food-img11"></div>
+        <h3>Item Name</h3>
+        <p class="price">₹120</p>
+        <p class="time">⏱ 15-20 mins</p>
+        <p class="rating">⭐ 4.5</p>
+        <button class="add-btn">Add to Cart</button>
+      </div>
+
+      <div class="food-card">
+        <div class="food-img12"></div>
+        <h3>Item Name</h3>
+        <p class="price">₹150</p>
+        <p class="time">⏱ 25-30 mins</p>
+        <p class="rating">⭐ 4.5</p>
+        <button class="add-btn">Add to Cart</button>
+      </div>
+
+      <div class="food-card">
+        <div class="food-img13"></div>
+        <h3>Item Name</h3>
+        <p class="price">₹99</p>
+        <p class="time">⏱ 20-25 mins</p>
+        <p class="rating">⭐ 4.5</p>
+        <button class="add-btn">Add to Cart</button>
+      </div>
+
+      <div class="food-card">
+        <div class="food-img14"></div>
+        <h3>Item Name</h3>
+        <p class="price">₹99</p>
+        <p class="time">⏱ 20-25 mins</p>
+        <p class="rating">⭐ 4.5</p>
+        <button class="add-btn">Add to Cart</button>
+      </div>
+
+      <div class="food-card">
+        <div class="food-img15"></div>
+        <h3>Item Name</h3>
+        <p class="price">₹99</p>
+        <p class="time">⏱ 20-25 mins</p>
+        <p class="rating">⭐ 4.5</p>
+        <button class="add-btn">Add to Cart</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-links">
+      <a href="#">About Us</a>
+      <a href="#">Help</a>
+      <a href="#">Terms & Conditions</a>
+    </div>
+    <div class="categories">
+      <p>Categories: Snacks | Beverages | Meals</p>
+    </div>
+    <p class="copyright">2025 VPP Canteen</p>
+  </footer>
+
+  <script>
+    // Mobile menu toggle
+    const hamburger = document.querySelector('.hamburger');
+    const nav = document.querySelector('.nav-links');
+
+    hamburger.addEventListener('click', () => {
+      const isOpen = nav.classList.toggle('show');
+      hamburger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+  </script>
+</body>
+</html>

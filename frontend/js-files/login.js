@@ -28,7 +28,7 @@
     const el = document.createElement("div");
     el.textContent = msg;
     el.style.cssText = "background:#111827;color:#fff;padding:10px 14px;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.25);font-size:14px;opacity:0;transform:translateY(10px);transition:opacity .2s, transform .2s";
-    host.appendChild(el);
+    host.appendChild(el);a
     requestAnimationFrame(()=>{ el.style.opacity="1"; el.style.transform="translateY(0)"; });
     setTimeout(()=>{ el.style.opacity="0"; el.style.transform="translateY(10px)"; setTimeout(()=>el.remove(), 200); }, ms);
   }
@@ -118,29 +118,31 @@
     return users.find(u => u.email.toLowerCase() === email.toLowerCase());
   }
 
-  function login(email, password) {
-    // block if rate-limited
-    if (rlBlocked()) {
-      const st = rlGet();
-      const msLeft = Math.max(0, WINDOW_MS - (now() - (st.windowStart || 0)));
-      const min = Math.ceil(msLeft / 60000);
-      throw new Error(`Too many attempts. Try again in ~${min} min.`);
-    }
-
-    const user = findUser(email);
-    const passOk = user ? user.pass === hash(password) : false;
-
-    if (!user || !passOk) {
-      const c = rlBump();
-      const remain = Math.max(0, MAX_ATTEMPTS - c);
-      throw new Error(remain ? `Invalid email or password. ${remain} attempts left.` : `Too many attempts. Please try again later.`);
-    }
-
-    // success
-    rlReset();
-    writeJSON(SESSION_KEY, { email: user.email, loginAt: Date.now() });
-    return true;
+  async function login(email, password) {
+  if (rlBlocked()) {
+    const st = rlGet();
+    const msLeft = Math.max(0, WINDOW_MS - (now() - (st.windowStart || 0)));
+    const min = Math.ceil(msLeft / 60000);
+    throw new Error(`Too many attempts. Try again in ~${min} min.`);
   }
+
+  const res = await fetch("http://localhost:3000/api/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password })
+  });
+
+  if (!res.ok) {
+    rlBump();
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.message || "Invalid email or password.");
+  }
+
+  rlReset();
+  const data = await res.json();
+  writeJSON(SESSION_KEY, { token: data.token, user: data.user, loginAt: Date.now() });
+  return true;
+}
 
   // ---------- Forgot password (mock) ----------
   function forgotPassword(email) {

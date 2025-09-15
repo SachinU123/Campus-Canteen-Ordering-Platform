@@ -186,16 +186,16 @@ body {
 }
 
 /* Bind images (use your existing paths) */
-.food-img  { background-image: url('../assets/images/IMG-20250824-WA0013.jpg'); }
-.food-img1 { background-image: url('../assets/images/IMG-20250824-WA0015.jpg'); }
-.food-img2 { background-image: url('../assets/images/IMG-20250824-WA0005.jpg'); }
-.food-img3 { background-image: url('../assets/images/IMG-20250824-WA0006.jpg'); }
-.food-img4 { background-image: url('../assets/images/IMG-20250824-WA0008.jpg'); }
-.food-img5 { background-image: url('../assets/images/IMG-20250824-WA0009.jpg'); }
-.food-img6 { background-image: url('../assets/images/IMG-20250824-WA0010.jpg'); }
-.food-img7 { background-image: url('../assets/images/IMG-20250824-WA0011.jpg'); }
-.food-img8 { background-image: url('../assets/images/IMG-20250824-WA0018.jpg'); }
-.food-img9 { background-image: url('../assets/images/IMG-20250824-WA0016.jpg'); }
+.food-img  { background-image: url('../assets/images/vegnoodles.jpg'); }
+.food-img1 { background-image: url('../assets/images/chickenbiryani.jpg'); }
+.food-img2 { background-image: url('../assets/images/pav-bhaji.jpg'); }
+.food-img3 { background-image: url('../assets/images/dahi-wada.jpg'); }
+.food-img4 { background-image: url('../assets/images/idli.jpg'); }
+.food-img5 { background-image: url('../assets/images/dosachutney.jpg'); }
+.food-img6 { background-image: url('../assets/images/Paneer\ Fried\ Rice.jpg'); }
+.food-img7 { background-image: url('../assets/images/vadasam.jpg'); }
+.food-img8 { background-image: url('../assets/images/vadapav.jpg'); }
+.food-img9 { background-image: url('../assets/images/paneerbiryani.jpg'); }
 
 /* Chinese Grid (Swiggy-style) */
 .food-grid-large {
@@ -214,6 +214,58 @@ body {
   padding: 0;        /* image is full-bleed; move padding to content */
   overflow: hidden;
 }
+
+/* ===== Detailed Item Modal (HOME) ===== */
+#item-modal{
+  position:fixed; inset:0; display:none;
+  align-items:center; justify-content:center;
+  background:rgba(0,0,0,.55); z-index:10000;
+  font: 400 16px/1.5 Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  color:#e8f2ec;
+}
+#item-modal[aria-hidden="false"]{ display:flex; }
+
+#item-modal #item-modal-card{
+  background:#0f1316;
+  width:94%; max-width:620px;
+  border:1px solid #2a2e35; border-radius:18px;
+  box-shadow:0 22px 70px rgba(0,0,0,.45);
+  overflow:hidden;
+}
+
+/* hero banner */
+#item-modal-hero{
+  height:200px; background:#0b0f12 center/cover no-repeat;
+  display:flex; align-items:center; justify-content:center;
+  color:#9fb8aa; font-size:14px;
+}
+
+/* content */
+#item-modal-title{ margin:0 0 6px; font-size:22px; line-height:1.25; }
+#item-modal-meta{ font-size:13px; color:#9fb8aa; margin:0 0 12px; }
+#item-modal-price{ font-weight:800; font-size:20px; margin-bottom:14px; }
+
+/* qty + buttons row */
+#item-modal .qty-btn{
+  border:1px solid #2a2e35; background:#0b0f12;
+  color:#e8f2ec; border-radius:10px; padding:6px 10px; cursor:pointer;
+}
+#item-modal .qty-val{ min-width:22px; text-align:center; display:inline-block; }
+
+#item-modal-cancel{
+  padding:8px 12px; border-radius:10px;
+  border:1px solid #2a2e35; background:#0b0f12; color:#e8f2ec;
+  cursor:pointer;
+}
+#item-modal-add{
+  padding:8px 14px; border-radius:10px; cursor:pointer;
+  border:none; font-weight:800; color:#032012;
+  background:linear-gradient(90deg,#00ff80,#43ffa9);
+}
+
+/* optional veg/non-veg dot if you add one later */
+#item-modal .veg-dot{ width:10px; height:10px; border-radius:50%; background:#21c55d; box-shadow:0 0 8px rgba(33,197,93,.6); display:inline-block; }
+#item-modal .nonveg-dot{ width:10px; height:10px; border-radius:50%; background:#ff7043; box-shadow:0 0 8px rgba(255,112,67,.6); display:inline-block; }
 
 /* Image area = first child div in card */
 .food-grid-large .food-card > div:first-child {
@@ -240,12 +292,12 @@ body {
 .food-grid-large .food-card .add-btn { margin-top: 10px; margin-bottom: 15px; }
 
 /* Chinese images binding */
-.food-img10 { background-image: url('../assets/images/IMG-20250824-WA0020.jpg'); }
-.food-img11 { background-image: url('../assets/images/IMG-20250824-WA0016.jpg'); }
-.food-img12 { background-image: url('../assets/images/IMG-20250824-WA0026.jpg'); }
-.food-img13 { background-image: url('../assets/images/IMG-20250824-WA0016.jpg'); }
-.food-img14 { background-image: url('../assets/images/IMG-20250824-WA0016.jpg'); }
-.food-img15 { background-image: url('../assets/images/IMG-20250824-WA0016.jpg'); }
+.food-img10 { background-image: url('../assets/images/vegnoodles.jpg'); }
+.food-img11 { background-image: url('../assets/images/loginimagehc.png'); }
+.food-img12 { background-image: url('../assets/images/egg\ noodles.jpeg'); }
+.food-img13 { background-image: url('../assets/images/chicken\ manchurian.jpg'); }
+.food-img14 { background-image: url('../assets/images/chicken\ fried\ rice.jpg'); }
+.food-img15 { background-image: url('../assets/images/veg-fried-rice.jpg'); }
 
 /* Footer */
 .footer {

@@ -1,0 +1,148 @@
+/* ====== Global ====== */
+:root{
+  --bg:#0b0b0f; --card:#ffffff; --muted:#667085; --ink:#0b1220;
+  --brand:#00ff84; --ring:rgba(0,0,0,.08);
+  --radius:18px;
+  --shadow: 0 20px 60px rgba(0,0,0,.35);
+  --glow: 0 14px 40px rgba(0,255,132,.25);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color:var(--ink); background:var(--bg); -webkit-font-smoothing:antialiased;
+}
+
+/* ====== Modal scaffolding ====== */
+.wrap{min-height:100%; display:grid; place-items:center; padding:24px}
+.backdrop{position:fixed; inset:0; background:rgba(0,0,0,.55); opacity:0; pointer-events:none; transition:opacity .25s ease}
+body.modal .backdrop{opacity:1; pointer-events:auto}
+
+.sheet{
+  width:min(920px, 96vw); background:var(--card); border-radius:var(--radius);
+  box-shadow:var(--shadow); overflow:hidden; border:1px solid var(--ring);
+  /* entrance animation */
+  opacity:0; transform:translateY(14px) scale(.985);
+  animation: sheetIn .38s cubic-bezier(.2,.9,.2,1) forwards;
+}
+@keyframes sheetIn{
+  to{ opacity:1; transform:translateY(0) scale(1); }
+}
+
+/* ====== Hero with shimmer while image loads ====== */
+.hero{position:relative; aspect-ratio:16/9; background:#eaeaea; overflow:hidden}
+.hero img{
+  width:100%; height:100%; object-fit:cover; display:block; opacity:0;
+  transition:opacity .4s ease, transform .45s ease;
+}
+.hero::before{
+  /* shimmer placeholder */
+  content:""; position:absolute; inset:0;
+  background:linear-gradient(100deg,#e9eef3 30%, #f5f8fb 45%, #e9eef3 60%);
+  background-size:200% 100%;
+  animation: shimmer 1.2s linear infinite;
+}
+@keyframes shimmer{
+  0%{ background-position:0% 0; } 100%{ background-position:-200% 0; }
+}
+/* show image, hide shimmer once loaded (set via HTML onload) */
+.hero img.is-ready{ opacity:1; }
+.hero.img-ready::before{ display:none; }
+
+/* micro parallax on hover (desktop only) */
+@media (hover:hover){
+  .hero:hover img{ transform:scale(1.03); }
+}
+
+/* ====== Badges ====== */
+.badge{
+  position:absolute; left:16px; top:16px; display:flex; gap:8px; align-items:center;
+  padding:6px 10px; background:rgba(255,255,255,.92); border-radius:999px; font-weight:600; font-size:12px;
+  box-shadow:0 2px 10px rgba(0,0,0,.12);
+  animation: pulse 2.4s ease-in-out infinite;
+}
+@keyframes pulse{
+  0%,100%{ box-shadow:0 0 0 0 rgba(0,255,132,.0); }
+  50%{ box-shadow:0 0 0 8px rgba(0,255,132,.15); }
+}
+.veg{width:10px;height:10px;border:2px solid #1fa64b;border-radius:2px;display:inline-grid;place-items:center}
+.veg::after{content:"";width:6px;height:6px;background:#1fa64b;display:block;border-radius:1px}
+
+/* ====== Content ====== */
+.content{padding:18px 18px 88px}
+h1{margin:4px 0 8px;font-size:clamp(20px, 2.6vw, 28px)}
+.meta{display:flex;flex-wrap:wrap;gap:14px;color:#475467;font-size:14px}
+.meta .dot{width:3px;height:3px;border-radius:999px;background:#98a2b3;display:inline-block;margin:0 8px}
+.statline{margin-top:14px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.stat{border:1px dashed #e6e6e6;border-radius:12px;padding:10px 12px;background:#fff}
+.stat .k{font-size:12px;color:#667085}
+.stat .v{font-weight:700}
+
+.section{margin-top:18px}
+.section h3{margin:0 0 8px;font-size:16px}
+.muted{color:#667085}
+
+.addons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.addon{padding:10px 12px;border:1px solid #eceff3;border-radius:12px;display:flex;justify-content:space-between;align-items:center;background:#fff}
+.addon .price{font-weight:600}
+
+/* ====== Sticky CTA ====== */
+.cta{
+  position:sticky; bottom:0; background:linear-gradient(180deg, rgba(255,255,255,0) 0%, #fff 18%);
+  margin-top:18px; padding:18px; border-top:1px solid #eef0f3; display:flex; gap:12px; align-items:center; justify-content:flex-end;
+}
+.priceTag{margin-right:auto; font-size:18px; font-weight:800}
+
+/* Buttons */
+.btn{
+  height:44px; padding:0 18px; border:none; border-radius:12px; cursor:pointer; font-weight:700;
+  display:inline-flex; align-items:center; gap:10px; transition:transform .12s ease, box-shadow .18s ease, filter .18s ease;
+  will-change: transform;
+}
+.btn:hover{ transform:translateY(-1px); }
+.btn:active{ transform:translateY(0); filter:saturate(.95); }
+.btn.primary{ background:#00e676; color:#002910; box-shadow:0 6px 18px rgba(0,230,118,.35); }
+.btn.primary:hover{ box-shadow:var(--glow); }
+.btn.ghost{background:#f2f4f7;border:1px solid #e4e7ec;border-radius:12px;height:40px;padding:0 14px}
+
+/* Quantity control */
+.qty{
+  display:inline-grid; grid-auto-flow:column; align-items:center; gap:8px; height:44px;
+  border:1px solid #e4e7ec; border-radius:12px; padding:0 8px; background:#fff;
+}
+.qty button{
+  width:34px;height:34px;border-radius:10px;border:1px solid #e4e7ec;background:#f8fafc;cursor:pointer;font-size:18px;
+  transition:transform .08s ease, box-shadow .12s ease;
+}
+.qty button:active{ transform:scale(.94); box-shadow:inset 0 0 0 999px rgba(0,0,0,.03); }
+
+/* Close chip on hero */
+.back{
+  position:absolute; left:12px; top:12px; background:rgba(0,0,0,.55); color:#fff; border:none; height:34px; padding:0 12px;
+  border-radius:999px; cursor:pointer; display:flex; align-items:center; gap:6px; backdrop-filter:saturate(1.2) blur(2px);
+  transition:transform .12s ease, filter .18s ease;
+}
+.back:hover{ transform:translateY(-1px); }
+.back:active{ transform:translateY(0); }
+
+/* ====== Full-page vs modal ====== */
+header.topbar{ display:none; color:#e6e6e6; padding:12px 18px; align-items:center; gap:12px; }
+header.topbar a{ color:#a6f5c8; text-decoration:none }
+body:not(.modal) header.topbar{ display:flex }
+
+/* ====== Responsive ====== */
+@media (max-width: 880px){
+  .statline{ grid-template-columns:repeat(3, minmax(0,1fr)); }
+}
+@media (max-width: 640px){
+  .wrap{ padding:12px; }
+  .sheet{ border-radius:16px; }
+  .addons{ grid-template-columns:1fr; }
+  .statline{ grid-template-columns:repeat(2, minmax(0,1fr)); }
+  .priceTag{ font-size:16px; }
+}
+
+/* ====== Reduced motion ====== */
+@media (prefers-reduced-motion: reduce){
+  .backdrop, .sheet, .hero img, .btn, .qty button, .badge{ animation:none !important; transition:none !important; }
+}
