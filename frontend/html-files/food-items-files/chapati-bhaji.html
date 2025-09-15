@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Vada Pav • VPP Canteen</title>
+  <meta name="theme-color" content="#0b0b0f" />
+  <link rel="stylesheet" href="../../css-files/food-item.css">
+  <script src="../../js-files/food-items.js" defer></script>
+</head>
+<body>
+  <div class="backdrop" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <a href="/index.html">← Back to menu</a>
+  </header>
+
+  <div class="wrap" role="dialog" aria-modal="true" aria-labelledby="title">
+    <article class="sheet" id="item-vada-pav" itemscope itemtype="https://schema.org/MenuItem">
+      <!-- Cover -->
+      <div class="hero">
+        <!-- Replace src with your CDN image -->
+        <img src="/images/food/vada-pav-hero.jpg" alt="Vada Pav" loading="eager" itemprop="image">
+        <button class="back" type="button" id="closeBtn" aria-label="Close">
+          <span aria-hidden="true">✕</span> Close
+        </button>
+        <div class="badge" title="Veg">
+          <span class="veg" aria-hidden="true"></span>
+          Veg
+        </div>
+      </div>
+
+      <!-- Body -->
+      <div class="content">
+        <h1 id="title" itemprop="name">Chapati Bhaji</h1>
+
+        <div class="meta" aria-label="quick stats">
+          <span id="eta">⏱ <strong>7-9 mins</strong></span>
+          <span class="dot"></span>
+          <span id="rating">⭐ <strong>4.5</strong></span>
+          <span class="dot"></span>
+          <span id="serves">🥣 <strong>1 serving</strong></span>
+        </div>
+
+        <div class="statline">
+          <div class="stat"><div class="k">Price</div><div class="v" id="price">₹<span itemprop="offers" itemscope itemtype="https://schema.org/Offer"><span itemprop="price">50</span></span></div></div>
+          <div class="stat"><div class="k">Calories</div><div class="v" id="calories">300 kcal</div></div>
+          <div class="stat"><div class="k">Prep time</div><div class="v" id="prep">7-9 mins</div></div>
+        </div>
+
+        <section class="section">
+          <h3>Description</h3>
+          <p class="muted" itemprop="description">
+            A homely Maharashtrian meal: soft whole wheat chapatis paired with a flavorful vegetable bhaji, 
+            served with chutney or pickle on the side.
+          </p>
+        </section>
+
+        <section class="section">
+          <h3>Add-ons (optional)</h3>
+          <div class="addons">
+            <!-- Placeholders you can edit or generate dynamically -->
+            <div class="addon"><span>Cheese slice</span><span class="price">+ ₹10</span></div>
+            <div class="addon"><span>Extra chutney</span><span class="price">+ ₹5</span></div>
+            <div class="addon"><span>Fried green chilli</span><span class="price">+ ₹5</span></div>
+            <div class="addon"><span>Butter pav</span><span class="price">+ ₹8</span></div>
+          </div>
+          <p class="muted" style="margin-top:8px">You can wire these to your real add-on system later.</p>
+        </section>
+
+        <!-- CTA -->
+        <div class="cta">
+          <div class="priceTag" aria-live="polite">Total: <span id="totalPrice">₹20</span></div>
+
+          <div class="qty" aria-label="Quantity selector">
+            <button type="button" id="dec">−</button>
+            <strong id="qty" style="min-width:2ch;text-align:center">1</strong>
+            <button type="button" id="inc">+</button>
+          </div>
+
+          <button class="btn ghost" type="button" id="closeBtn2">Close</button>
+          <button class="btn primary" type="button" id="addBtn">Add to Cart</button>
+        </div>
+      </div>
+    </article>
+  </div>
+</body>
+</html>
