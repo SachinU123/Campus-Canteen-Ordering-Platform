@@ -1,4 +1,3 @@
-
 (function () {
   // --------------- Utils ---------------
   const $ = (sel, ctx = document) => ctx.querySelector(sel);
@@ -9,7 +8,8 @@
 
   const INR = (n) => `${CURRENCY}${Number(n || 0).toFixed(0)}`;
   const parsePriceText = (t) => Number((t || "").replace(/[^\d.]/g, "") || 0);
-  const safeId = (name, price) => `${(name || "item").toLowerCase().replace(/\s+/g, "-")}--${Number(price || 0)}`;
+  const safeId = (name, price) =>
+    `${(name || "item").toLowerCase().replace(/\s+/g, "-")}--${Number(price || 0)}`;
 
   function readCart() {
     try {
@@ -76,8 +76,15 @@
     el.style.cssText =
       "background:#111827;color:#fff;padding:10px 14px;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.25);font-size:14px;opacity:0;transition:opacity .2s, transform .2s;transform:translateY(10px)";
     host.appendChild(el);
-    requestAnimationFrame(() => { el.style.opacity = "1"; el.style.transform = "translateY(0)"; });
-    setTimeout(() => { el.style.opacity = "0"; el.style.transform = "translateY(10px)"; setTimeout(() => el.remove(), 200); }, ms);
+    requestAnimationFrame(() => {
+      el.style.opacity = "1";
+      el.style.transform = "translateY(0)";
+    });
+    setTimeout(() => {
+      el.style.opacity = "0";
+      el.style.transform = "translateY(10px)";
+      setTimeout(() => el.remove(), 200);
+    }, ms);
   }
 
   // --------------- Modal (Item Details) ---------------
@@ -88,7 +95,8 @@
     modal = document.createElement("div");
     modal.id = "menu-item-modal";
     modal.setAttribute("aria-hidden", "true");
-    modal.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:10000;";
+    modal.style.cssText =
+      "position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:10000;";
     modal.innerHTML = `
       <div role="dialog" aria-modal="true" aria-labelledby="mi-title"
            style="background:#fff;max-width:560px;width:92%;border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:hidden">
@@ -145,7 +153,6 @@
     const qty = $("#mi-qty", modal);
     const addBtn = $("#mi-add", modal);
 
-    // Basic hero: if you add CSS bg by class (e.g., .pancakes-hero) set hero.className = that
     hero.className = "";
     hero.style.background = "#f3f4f6";
 
@@ -172,29 +179,36 @@
     modalItem = null;
   }
 
-  // --------------- Flip logic ---------------
+  // --------------- Flip logic (multi-page) ---------------
   function wireFlip() {
     const book = $("#book");
-    const right = $("#page-right");
-    if (!book || !right) return;
+    const pages = $$(".page", book);
+    if (!book || !pages.length) return;
 
-    let flipped = false;
-    const setAria = () => right.setAttribute("aria-hidden", (!flipped).toString());
-    setAria();
+    let current = 0; // current flip stage (0 = Breakfast/Meals, 1 = Snacks/Beverages)
+
+    function updateFlip() {
+      pages.forEach((p, i) => {
+        if (i <= current * 2 - 1) {
+          p.classList.add("flipped");
+        } else {
+          p.classList.remove("flipped");
+        }
+      });
+    }
 
     book.addEventListener("click", (e) => {
-      if ((e.target.closest("button") || e.target.closest("a"))) return;
+      if (e.target.closest("button") || e.target.closest("a")) return;
       const rect = book.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const half = rect.width / 2;
-      if (!flipped && x > half) {
-        right.classList.add("flipped");
-        flipped = true;
-        setAria();
-      } else if (flipped && x < half) {
-        right.classList.remove("flipped");
-        flipped = false;
-        setAria();
+
+      if (x > half && current < 1) {
+        current++;
+        updateFlip();
+      } else if (x < half && current > 0) {
+        current--;
+        updateFlip();
       }
     });
   }
@@ -224,7 +238,6 @@
       apply(btn.dataset.filter);
     });
 
-    // default
     apply("all");
   }
 
@@ -236,14 +249,16 @@
 
       const name = $(".name", el)?.textContent?.trim() || "Item";
       const price = parsePriceText($(".price", el)?.textContent || "0");
-      const category = (["breakfast","meals","snacks","beverages"].find(c => el.classList.contains(c))) || "";
+      const category =
+        ["breakfast", "meals", "snacks", "beverages"].find((c) =>
+          el.classList.contains(c)
+        ) || "";
       const id = safeId(name, price);
 
       const item = { id, name, price, category, veg: true, desc: "" };
       showModal(item);
     });
 
-    // Keyboard: Enter/Space opens modal
     $$(".menu-item").forEach((el) => {
       if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "0");
       el.setAttribute("role", "button");
@@ -268,6 +283,7 @@
     updateBadge();
   }
 
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+  if (document.readyState === "loading")
+    document.addEventListener("DOMContentLoaded", init);
   else init();
 })();
