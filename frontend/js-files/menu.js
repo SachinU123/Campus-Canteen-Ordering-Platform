@@ -1,4 +1,7 @@
+<<<<<<< HEAD
+=======
 // /js-files/menu.js  (rewrite: keep modal popup on card click, richer details)
+>>>>>>> 83c2bea014322e231824092f664e0d7f4efc0a42
 (function () {
   // --------------- Utils ---------------
   const $  = (sel, ctx = document) => ctx.querySelector(sel);
@@ -8,8 +11,13 @@
   const CURRENCY = "₹";
   const INR = (n) => `${CURRENCY}${Number(n || 0).toFixed(0)}`;
   const parsePriceText = (t) => Number((t || "").replace(/[^\d.]/g, "") || 0);
+<<<<<<< HEAD
+  const safeId = (name, price) =>
+    `${(name || "item").toLowerCase().replace(/\s+/g, "-")}--${Number(price || 0)}`;
+=======
   const safeId = (name, price) => `${(name || "item").toLowerCase().replace(/\s+/g, "-")}--${Number(price || 0)}`;
   const capitalize = (s = "") => s.charAt(0).toUpperCase() + s.slice(1);
+>>>>>>> 83c2bea014322e231824092f664e0d7f4efc0a42
 
   // --------------- Cart ---------------
   function readCart() {
@@ -71,8 +79,15 @@
     el.style.cssText =
       "background:#111827;color:#fff;padding:10px 14px;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.25);font-size:14px;opacity:0;transition:opacity .2s, transform .2s;transform:translateY(10px)";
     host.appendChild(el);
-    requestAnimationFrame(() => { el.style.opacity = "1"; el.style.transform = "translateY(0)"; });
-    setTimeout(() => { el.style.opacity = "0"; el.style.transform = "translateY(10px)"; setTimeout(() => el.remove(), 200); }, ms);
+    requestAnimationFrame(() => {
+      el.style.opacity = "1";
+      el.style.transform = "translateY(0)";
+    });
+    setTimeout(() => {
+      el.style.opacity = "0";
+      el.style.transform = "translateY(10px)";
+      setTimeout(() => el.remove(), 200);
+    }, ms);
   }
 
   // --------------- Catalog helpers (optional) ---------------
@@ -92,7 +107,11 @@
     modal.id = "menu-item-modal";
     modal.setAttribute("aria-hidden", "true");
     modal.style.cssText =
+<<<<<<< HEAD
+      "position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:10000;";
+=======
       "position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:10000;";
+>>>>>>> 83c2bea014322e231824092f664e0d7f4efc0a42
     modal.innerHTML = `
       <div role="dialog" aria-modal="true" aria-labelledby="mi-title"
            style="background:#0f1316;color:#e8f2ec;max-width:620px;width:94%;border-radius:18px;border:1px solid #2a2e35;box-shadow:0 22px 70px rgba(0,0,0,.45);overflow:hidden">
@@ -156,6 +175,10 @@
     const desc   = $("#mi-desc", modal);
     const link   = $("#mi-details", modal);
 
+<<<<<<< HEAD
+    hero.className = "";
+    hero.style.background = "#f3f4f6";
+=======
     // Image
     hero.innerHTML = "";
     if (item.img) {
@@ -167,6 +190,7 @@
     } else {
       hero.innerHTML = `<span style="opacity:.6">No image</span>`;
     }
+>>>>>>> 83c2bea014322e231824092f664e0d7f4efc0a42
 
     // Main texts
     title.textContent = item.name;
@@ -223,29 +247,40 @@
     modalItem = null;
   }
 
-  // --------------- Flip logic ---------------
+  // --------------- Flip logic (multi-page) ---------------
   function wireFlip() {
     const book = $("#book");
-    const right = $("#page-right");
-    if (!book || !right) return;
+    const pages = $$(".page", book);
+    if (!book || !pages.length) return;
 
-    let flipped = false;
-    const setAria = () => right.setAttribute("aria-hidden", (!flipped).toString());
-    setAria();
+    let current = 0; // current flip stage (0 = Breakfast/Meals, 1 = Snacks/Beverages)
+
+    function updateFlip() {
+      pages.forEach((p, i) => {
+        if (i <= current * 2 - 1) {
+          p.classList.add("flipped");
+        } else {
+          p.classList.remove("flipped");
+        }
+      });
+    }
 
     book.addEventListener("click", (e) => {
+<<<<<<< HEAD
+      if (e.target.closest("button") || e.target.closest("a")) return;
+=======
       if ((e.target.closest("button") || e.target.closest("a") || e.target.closest(".menu-item"))) return;
+>>>>>>> 83c2bea014322e231824092f664e0d7f4efc0a42
       const rect = book.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const half = rect.width / 2;
-      if (!flipped && x > half) {
-        right.classList.add("flipped");
-        flipped = true;
-        setAria();
-      } else if (flipped && x < half) {
-        right.classList.remove("flipped");
-        flipped = false;
-        setAria();
+
+      if (x > half && current < 1) {
+        current++;
+        updateFlip();
+      } else if (x < half && current > 0) {
+        current--;
+        updateFlip();
       }
     });
   }
@@ -275,7 +310,11 @@
       apply(btn.dataset.filter);
     });
 
+<<<<<<< HEAD
+    apply("all");
+=======
     apply("all"); // default
+>>>>>>> 83c2bea014322e231824092f664e0d7f4efc0a42
   }
 
   // --------------- Menu Item → Modal (keep popup) ---------------
@@ -286,7 +325,15 @@
 
       const name = $(".name", el)?.textContent?.trim() || "Item";
       const price = parsePriceText($(".price", el)?.textContent || "0");
+<<<<<<< HEAD
+      const category =
+        ["breakfast", "meals", "snacks", "beverages"].find((c) =>
+          el.classList.contains(c)
+        ) || "";
+      const id = safeId(name, price);
+=======
       const category = (["breakfast","meals","snacks","beverages"].find(c => el.classList.contains(c))) || "";
+>>>>>>> 83c2bea014322e231824092f664e0d7f4efc0a42
 
       // Build item from DOM first
       let item = {
@@ -323,7 +370,10 @@
       showModal(item);
     });
 
+<<<<<<< HEAD
+=======
     // Keyboard a11y: open modal on Enter/Space
+>>>>>>> 83c2bea014322e231824092f664e0d7f4efc0a42
     $$(".menu-item").forEach((el) => {
       if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "0");
       el.setAttribute("role", "button");
@@ -345,6 +395,7 @@
     updateBadge();
   }
 
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+  if (document.readyState === "loading")
+    document.addEventListener("DOMContentLoaded", init);
   else init();
 })();
