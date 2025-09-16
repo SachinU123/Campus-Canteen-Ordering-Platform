@@ -81,96 +81,60 @@
   }
 
   // --------------- Modal (Item Details) ---------------
-  function ensureModal() {
-    let modal = $("#menu-item-modal");
-    if (modal) return modal;
+// ===== Modal that hosts an IFRAME with the detail page =====
+function ensureModal() {
+  let modal = document.getElementById("menu-item-modal");
+  if (modal) return modal;
 
-    modal = document.createElement("div");
-    modal.id = "menu-item-modal";
-    modal.setAttribute("aria-hidden", "true");
-    modal.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:10000;";
-    modal.innerHTML = `
-      <div role="dialog" aria-modal="true" aria-labelledby="mi-title"
-           style="background:#fff;max-width:560px;width:92%;border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:hidden">
-        <div id="mi-hero" style="height:150px;background:#f3f4f6"></div>
-        <div style="padding:16px 18px 18px">
-          <h3 id="mi-title" style="margin:0 0 6px;font-size:20px"></h3>
-          <div id="mi-meta" class="muted" style="font-size:14px;margin:0 0 10px"></div>
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-            <div id="mi-price" style="font-weight:700;font-size:18px"></div>
-            <div style="margin-left:auto;display:flex;align-items:center;gap:8px">
-              <button id="mi-dec" aria-label="Decrease" style="border:1px solid #e5e7eb;background:#fff;border-radius:8px;padding:6px 8px;cursor:pointer">−</button>
-              <span id="mi-qty" aria-live="polite" style="min-width:22px;text-align:center">1</span>
-              <button id="mi-inc" aria-label="Increase" style="border:1px solid #e5e7eb;background:#fff;border-radius:8px;padding:6px 8px;cursor:pointer">+</button>
-            </div>
-          </div>
-          <div style="display:flex;gap:10px;justify-content:flex-end">
-            <button id="mi-cancel" style="padding:8px 12px;border-radius:10px;border:1px solid #e5e7eb;background:#fff;cursor:pointer">Close</button>
-            <button id="mi-add" style="padding:8px 14px;border-radius:10px;border:none;background:#111827;color:#fff;cursor:pointer">Add to Cart</button>
-          </div>
-        </div>
+  modal = document.createElement("div");
+  modal.id = "menu-item-modal";
+  modal.setAttribute("aria-hidden", "true");
+  modal.style.cssText = `
+    position:fixed; inset:0; background:rgba(0,0,0,.55);
+    display:none; align-items:center; justify-content:center; z-index:10000;
+  `;
+  modal.innerHTML = `
+    <div role="dialog" aria-modal="true" aria-label="Item details"
+         style="background:#fff; width:min(980px, 96vw); height:min(86vh, 900px);
+                border-radius:18px; box-shadow:0 20px 60px rgba(0,0,0,.35);
+                display:flex; flex-direction:column; overflow:hidden">
+      <div style="display:flex; align-items:center; gap:10px; padding:10px 12px; border-bottom:1px solid #e5e7eb;">
+        <strong style="font-family:Inter,system-ui; font-size:16px">Item Details</strong>
+        <button id="mi-close"
+                style="margin-left:auto; padding:8px 12px; border-radius:10px; border:1px solid #e5e7eb; background:#fff; cursor:pointer">
+          Close
+        </button>
       </div>
-    `;
-    document.body.appendChild(modal);
+      <iframe id="mi-frame" title="Item detail"
+              style="width:100%; height:100%; border:0; background:#fff"></iframe>
+    </div>
+  `;
+  document.body.appendChild(modal);
 
-    modal.addEventListener("click", (e) => {
-      if (e.target === modal) hideModal();
-    });
-    $("#mi-cancel", modal).addEventListener("click", hideModal);
+  // close on backdrop click
+  modal.addEventListener("click", (e) => { if (e.target === modal) hideModal(); });
+  modal.querySelector("#mi-close").addEventListener("click", hideModal);
 
-    $("#mi-dec", modal).addEventListener("click", () => {
-      const q = $("#mi-qty");
-      const n = Math.max(1, Number(q.textContent) - 1);
-      q.textContent = String(n);
-    });
-    $("#mi-inc", modal).addEventListener("click", () => {
-      const q = $("#mi-qty");
-      const n = Number(q.textContent) + 1;
-      q.textContent = String(n);
-    });
+  return modal;
+}
 
-    return modal;
-  }
+function showDetailInModal(url) {
+  const modal = ensureModal();
+  const frame = modal.querySelector("#mi-frame");
+  frame.src = url;                    // <-- your page loads here with its own CSS/JS
+  modal.style.display = "flex";
+  modal.setAttribute("aria-hidden", "false");
+}
 
-  let modalItem = null;
+function hideModal() {
+  const modal = document.getElementById("menu-item-modal");
+  if (!modal) return;
+  const frame = modal.querySelector("#mi-frame");
+  if (frame) frame.src = "about:blank"; // unload page on close
+  modal.style.display = "none";
+  modal.setAttribute("aria-hidden", "true");
+}
 
-  function showModal(item) {
-    const modal = ensureModal();
-    modalItem = item;
-
-    const hero = $("#mi-hero", modal);
-    const title = $("#mi-title", modal);
-    const meta = $("#mi-meta", modal);
-    const price = $("#mi-price", modal);
-    const qty = $("#mi-qty", modal);
-    const addBtn = $("#mi-add", modal);
-
-    // Basic hero: if you add CSS bg by class (e.g., .pancakes-hero) set hero.className = that
-    hero.className = "";
-    hero.style.background = "#f3f4f6";
-
-    title.textContent = item.name;
-    meta.textContent = item.category ? `${capitalize(item.category)} · ★ 4.5` : "★ 4.5";
-    price.textContent = INR(item.price);
-    qty.textContent = "1";
-
-    addBtn.onclick = () => {
-      const n = Number(qty.textContent) || 1;
-      addToCart(item, n);
-      hideModal();
-    };
-
-    modal.style.display = "flex";
-    modal.setAttribute("aria-hidden", "false");
-  }
-
-  function hideModal() {
-    const modal = $("#menu-item-modal");
-    if (!modal) return;
-    modal.style.display = "none";
-    modal.setAttribute("aria-hidden", "true");
-    modalItem = null;
-  }
 
   // --------------- Flip logic ---------------
   function wireFlip() {
@@ -230,31 +194,36 @@
 
   // --------------- Menu Item -> Modal ---------------
   function wireMenuClicks() {
-    document.addEventListener("click", (e) => {
-      const el = e.target.closest(".menu-item");
-      if (!el) return;
+  document.addEventListener("click", (e) => {
+    const el = e.target.closest(".menu-item");
+    if (!el) return;
 
-      const name = $(".name", el)?.textContent?.trim() || "Item";
-      const price = parsePriceText($(".price", el)?.textContent || "0");
-      const category = (["breakfast","meals","snacks","beverages"].find(c => el.classList.contains(c))) || "";
-      const id = safeId(name, price);
+    // Get the item name from the clicked menu item
+    const name = (el.querySelector(".name")?.textContent || "item").trim();
 
-      const item = { id, name, price, category, veg: true, desc: "" };
-      showModal(item);
+    // Convert name -> filename (e.g., "Alu Mutter" -> "alu-mutter.html")
+    const fileName = name.toLowerCase().replace(/\s+/g, "-") + ".html";
+
+    // Adjust path based on your folder structure
+    const url = "food-items-files/" + fileName;
+
+    // Open the detail page inside the popup iframe
+    showDetailInModal(url);
+  });
+
+  // Keyboard accessibility: Enter/Space opens modal
+  document.querySelectorAll(".menu-item").forEach((el) => {
+    if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "0");
+    el.setAttribute("role", "link");
+    el.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        el.click();
+      }
     });
+  });
+}
 
-    // Keyboard: Enter/Space opens modal
-    $$(".menu-item").forEach((el) => {
-      if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "0");
-      el.setAttribute("role", "button");
-      el.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          el.click();
-        }
-      });
-    });
-  }
 
   // --------------- Helpers ---------------
   const capitalize = (s = "") => s.charAt(0).toUpperCase() + s.slice(1);

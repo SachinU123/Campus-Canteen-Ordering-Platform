@@ -1,86 +1,51 @@
-
+/* home.js — VPP Canteen (unique badge count, iframe details, Chinese auto-swipe with arrows, no dots) */
 (function () {
-  // ---------- Utilities ----------
-  const $ = (sel, ctx = document) => ctx.querySelector(sel);
+  // ------------------ Config ------------------
+  const ITEM_PAGES_DIR = "html-files/food-items-files/"; // relative to index.html
+  const CART_KEY = "vpp_canteen_cart";
+  const AUTO_SWIPE_MS = 5000; // Chinese carousel: 5 seconds
+
+  // ------------------ Tiny DOM helpers ------------------
+  const $  = (sel, ctx = document) => ctx.querySelector(sel);
   const $$ = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
 
-  const CART_KEY = "vpp_canteen_cart";
+  // ------------------ Utils ------------------
+  const parsePrice = (text) => Number((text || "").replace(/[^\d.]/g, "") || 0);
+  const slugify    = (s="") => s.toLowerCase().trim().replace(/\s+/g, "-").replace(/[^a-z0-9\-]/g, "");
 
+  // ------------------ Storage ------------------
   function readCart() {
-    try {
-      return JSON.parse(localStorage.getItem(CART_KEY)) || [];
-    } catch {
-      return [];
-    }
+    try { return JSON.parse(localStorage.getItem(CART_KEY)) || []; }
+    catch { return []; }
   }
-
   function writeCart(cart) {
     localStorage.setItem(CART_KEY, JSON.stringify(cart));
     updateCartBadge(cart);
   }
 
-  function addToCart(item) {
-    const cart = readCart();
-    const idx = cart.findIndex((x) => x.id === item.id);
-    if (idx >= 0) {
-      cart[idx].qty += 1;
-    } else {
-      cart.push({ ...item, qty: 1 });
-    }
-    writeCart(cart);
-    toast(`${item.name} added to cart`);
-  }
-
+  // ------------------ Cart badge (UNIQUE items, not quantities) ------------------
   function updateCartBadge(cart = readCart()) {
+    // Prefer your existing nav cart button
     const cartBtn = $(".cart-btn");
     if (!cartBtn) return;
 
     let badge = cartBtn.querySelector(".cart-badge");
-    const total = cart.reduce((s, x) => s + (x.qty || 0), 0);
+    // Unique items = number of line items with qty > 0
+    const uniqueCount = cart.filter(it => (it?.qty || 0) > 0).length;
 
     if (!badge) {
       badge = document.createElement("span");
-      badge.className =
-        "cart-badge";
-      // Minimal inline styles to avoid needing CSS:
+      badge.className = "cart-badge";
+      // Minimal inline styles so this works without extra CSS
       badge.style.cssText =
-        "display:inline-flex;min-width:18px;height:18px;padding:0 5px;border-radius:9px;align-items:center;justify-content:center;font-size:11px;background:#e11d48;color:#fff;margin-left:6px;";
+        "display:inline-flex;min-width:18px;height:18px;padding:0 5px;border-radius:9px;align-items:center;justify-content:center;font-size:11px;background:#e11d48;color:#fff;margin-left:6px;line-height:18px;";
       cartBtn.appendChild(badge);
     }
-    badge.textContent = total > 99 ? "99+" : String(total);
-    badge.style.visibility = total ? "visible" : "hidden";
+    badge.textContent = uniqueCount > 99 ? "99+" : String(uniqueCount);
+    badge.style.visibility = uniqueCount ? "visible" : "hidden";
   }
 
-  function parsePrice(text) {
-    // e.g., "₹120"
-    const n = (text || "").replace(/[^\d.]/g, "");
-    return Number(n || 0);
-  }
-
-  function getCardItem(card) {
-    const title = $("h3", card)?.textContent?.trim() || "Item";
-    const priceText = $(".price", card)?.textContent || "₹0";
-    const price = parsePrice(priceText);
-    const time = $(".time", card)?.textContent?.trim() || "";
-    const rating = $(".rating", card)?.textContent?.trim() || "";
-    // Try to capture the first image div class for styling reference
-    const imgDiv =
-      card.querySelector("[class^='food-img']") || card.querySelector("div");
-    const imgClass = imgDiv ? imgDiv.className : "";
-    // Generate a stable id from title + price
-    const id = `${title.toLowerCase().replace(/\s+/g, "-")}--${price}`;
-
-    return {
-      id,
-      name: title,
-      price,
-      time,
-      rating,
-      imgClass,
-    };
-  }
-
-  // ---------- Toasts ----------
+  // ------------------ Toasts ------------------
   function ensureToastHost() {
     let host = $("#toast-host");
     if (!host) {
@@ -92,8 +57,7 @@
     }
     return host;
   }
-
-  function toast(message, duration = 1800) {
+  function toast(message, duration = 1600) {
     const host = ensureToastHost();
     const el = document.createElement("div");
     el.textContent = message;
@@ -112,130 +76,228 @@
     }, duration);
   }
 
-  // ---------- Modal (Item Details) ----------
-  function ensureModal() {
-    let modal = $("#item-modal");
-    if (!modal) {
-      modal = document.createElement("div");
-      modal.id = "item-modal";
-      modal.setAttribute("aria-hidden", "true");
-      modal.style.cssText =
-        "position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:10000;";
-      modal.innerHTML = `
-        <div id="item-modal-card" role="dialog" aria-modal="true" aria-labelledby="item-modal-title"
-             style="background:#fff;max-width:560px;width:92%;border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:hidden">
-          <div id="item-modal-hero" style="height:180px;background:#f3f4f6;"></div>
-          <div style="padding:16px 18px 18px">
-            <h3 id="item-modal-title" style="margin:0 0 6px;font-size:20px;line-height:1.2"></h3>
-            <div id="item-modal-meta" style="font-size:14px;color:#374151;margin-bottom:12px"></div>
-            <div id="item-modal-price" style="font-weight:600;font-size:18px;margin-bottom:14px"></div>
-            <div style="display:flex;gap:10px;justify-content:flex-end">
-              <button id="item-modal-cancel" style="padding:8px 12px;border-radius:10px;border:1px solid #e5e7eb;background:#fff;cursor:pointer">Close</button>
-              <button id="item-modal-add" style="padding:8px 14px;border-radius:10px;border:none;background:#111827;color:#fff;cursor:pointer">Add to Cart</button>
-            </div>
-          </div>
-        </div>
-      `;
-      document.body.appendChild(modal);
+  // ------------------ Cart ops ------------------
+  function addToCart(item) {
+    const cart = readCart();
+    const idx = cart.findIndex(x => x.id === item.id);
+    if (idx >= 0) cart[idx].qty += 1;
+    else cart.push({ ...item, qty: 1 });
+    writeCart(cart);
+    toast(`${item.name} added to cart`);
+  }
 
-      modal.addEventListener("click", (e) => {
-        if (e.target === modal) hideModal();
-      });
-      $("#item-modal-cancel", modal).addEventListener("click", hideModal);
-    }
+  // ------------------ Item parsing from cards ------------------
+  function getCardItem(card) {
+    const title = $("h3", card)?.textContent?.trim() || "Item";
+    const price = parsePrice($(".price", card)?.textContent || "0");
+    const id = `${slugify(title)}--${price}`;
+    return { id, name: title, price };
+  }
+
+  // ------------------ IFRAME modal for detail pages (self-contained) ------------------
+  function ensureModal() {
+    let modal = document.getElementById("menu-item-modal");
+    if (modal) return modal;
+
+    modal = document.createElement("div");
+    modal.id = "menu-item-modal";
+    modal.setAttribute("aria-hidden", "true");
+    modal.style.cssText = `
+      position:fixed; inset:0; background:rgba(0,0,0,.55);
+      display:none; align-items:center; justify-content:center; z-index:10000;
+    `;
+    modal.innerHTML = `
+      <div role="dialog" aria-modal="true" aria-label="Item details"
+           style="background:#fff; width:min(980px, 96vw); height:min(86vh, 900px);
+                  border-radius:18px; box-shadow:0 20px 60px rgba(0,0,0,.35);
+                  display:flex; flex-direction:column; overflow:hidden">
+        <div style="display:flex; align-items:center; gap:10px; padding:10px 12px; border-bottom:1px solid #e5e7eb;">
+          <strong style="font-family:Inter,system-ui; font-size:16px">Item Details</strong>
+          <button id="mi-close"
+                  style="margin-left:auto; padding:8px 12px; border-radius:10px; border:1px solid #e5e7eb; background:#fff; cursor:pointer">
+            Close
+          </button>
+        </div>
+        <iframe id="mi-frame" title="Item detail"
+                style="width:100%; height:100%; border:0; background:#fff"></iframe>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    modal.addEventListener("click", (e) => { if (e.target === modal) hideModal(); });
+    modal.querySelector("#mi-close").addEventListener("click", hideModal);
     return modal;
   }
-
-  let currentModalItem = null;
-
-  function showModal(item) {
+  function showDetailInModal(url) {
     const modal = ensureModal();
-    currentModalItem = item;
-
-    const hero = $("#item-modal-hero", modal);
-    const title = $("#item-modal-title", modal);
-    const meta = $("#item-modal-meta", modal);
-    const price = $("#item-modal-price", modal);
-    const addBtn = $("#item-modal-add", modal);
-
-    // Render hero using the card's image class if available
-    hero.className = item.imgClass || "";
-    // If hero has no bg from CSS, ensure a neutral fallback:
-    hero.style.background = hero.className ? "" : "#f3f4f6";
-
-    title.textContent = item.name;
-    meta.textContent = [item.time, item.rating].filter(Boolean).join(" · ");
-    price.textContent = `₹${item.price}`;
-
-    addBtn.onclick = () => {
-      addToCart(item);
-      hideModal();
-    };
-
+    const frame = modal.querySelector("#mi-frame");
+    frame.src = url;
     modal.style.display = "flex";
     modal.setAttribute("aria-hidden", "false");
-    // Focus trap start:
-    $("#item-modal-card", modal).focus?.();
   }
-
   function hideModal() {
-    const modal = $("#item-modal");
+    const modal = document.getElementById("menu-item-modal");
     if (!modal) return;
+    const frame = modal.querySelector("#mi-frame");
+    if (frame) frame.src = "about:blank";
     modal.style.display = "none";
     modal.setAttribute("aria-hidden", "true");
-    currentModalItem = null;
   }
 
-  // ---------- Event Delegation ----------
-  function onDocumentClick(e) {
-    const addBtn = e.target.closest(".add-btn");
-    if (addBtn) {
-      const card = addBtn.closest(".food-card");
-      if (!card) return;
-      const item = getCardItem(card);
-      addToCart(item);
-      return;
-    }
-
-    // Clicking a food card (but not when the click was on the add button)
-    const card = e.target.closest(".food-card");
-    if (card && !e.target.closest(".add-btn")) {
-      const item = getCardItem(card);
-      showModal(item);
-      return;
-    }
-
-    // Nav behavior: prefer in-page sections (#home, #menu, #orders, #cart)
-    const navLink = e.target.closest(".nav-links a");
-    if (navLink) {
-      const href = navLink.getAttribute("href") || "#";
-      if (href.startsWith("#")) {
-        e.preventDefault();
-        const target = document.querySelector(href);
-        if (target) {
-          target.scrollIntoView({ behavior: "smooth", block: "start" });
-          history.replaceState(null, "", href);
-        }
-        // If section not present, default browser navigation (no-op)
-      }
-    }
-  }
-
-  function onDocumentKeydown(e) {
-    // Open details with Enter/Space when focusing a card
-    if ((e.key === "Enter" || e.key === " ") && document.activeElement) {
-      const card = document.activeElement.closest?.(".food-card");
-      if (card) {
-        e.preventDefault();
+  // ------------------ Click/Key handling (Add to Cart + open details) ------------------
+  function wireCardInteractions() {
+    document.addEventListener("click", (e) => {
+      // Add to cart button
+      const addBtn = e.target.closest(".add-btn");
+      if (addBtn) {
+        const card = addBtn.closest(".food-card");
+        if (!card) return;
         const item = getCardItem(card);
-        showModal(item);
+        addToCart(item);
+        return;
       }
-    }
-    // Close modal with Escape
-    if (e.key === "Escape") hideModal();
+
+      // Click on card itself (but not on the 'Add' button) -> open detail page in modal
+      const card = e.target.closest(".food-card");
+      if (card && !e.target.closest(".add-btn")) {
+        const name = $("h3", card)?.textContent?.trim() || "item";
+        const url  = ITEM_PAGES_DIR + slugify(name) + ".html";
+        showDetailInModal(url);
+        return;
+      }
+
+      // Navbar (mobile): handled by existing inline script in index OR handled elsewhere
+    });
+
+    // Keyboard accessibility for cards
+    $$(".food-card").forEach((card) => {
+      if (!card.hasAttribute("tabindex")) card.setAttribute("tabindex", "0");
+      card.setAttribute("role", "link");
+      card.setAttribute("aria-label", `${$("h3", card)?.textContent || "Item"} details`);
+      card.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          const name = $("h3", card)?.textContent?.trim() || "item";
+          const url  = ITEM_PAGES_DIR + slugify(name) + ".html";
+          showDetailInModal(url);
+        }
+      });
+    });
+
+    // Escape closes modal
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") hideModal();
+    });
   }
 
-  // ---------- Hamburger Toggle (keeps your existing behavior) ----------
+  // ------------------ Chinese auto-swipe (arrows, no dots) ------------------
+  // Works with your existing .food-sec (Chinese section) and .food-grid-large container.
+  // We keep the cards/styles, and simply scroll the container to the next card every 5s.
+  function wireChineseCarousel() {
+    const section = document.querySelector(".food-sec");
+    const grid = section?.querySelector(".food-grid-large");
+    if (!grid) return;
+
+    // Make container horizontally scrollable without changing your card styles
+    grid.style.overflowX = "auto";
+    grid.style.scrollBehavior = "smooth";
+    grid.style.scrollSnapType = "x mandatory"; // gentle snap
+    // Each card snaps (best-effort)
+    $$(".food-card", grid).forEach((c) => (c.style.scrollSnapAlign = "start"));
+
+    // Create arrows (no dots)
+    const mkBtn = (label, dir) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = `cn-arrow cn-${dir}`;
+      b.setAttribute("aria-label", label);
+      b.style.cssText = `
+        position:absolute; top:50%; transform:translateY(-50%);
+        ${dir === "prev" ? "left:8px" : "right:8px"};
+        background:rgba(0,0,0,.55); color:#fff; border:1px solid rgba(255,255,255,.25);
+        padding:8px 10px; border-radius:999px; cursor:pointer; z-index:2;
+        backdrop-filter:saturate(140%) blur(4px);
+      `;
+      b.textContent = dir === "prev" ? "‹" : "›";
+      return b;
+    };
+
+    // Ensure section is positioned so arrows can overlay
+    section.style.position = section.style.position || "relative";
+    const prevBtn = mkBtn("Previous", "prev");
+    const nextBtn = mkBtn("Next", "next");
+    section.appendChild(prevBtn);
+    section.appendChild(nextBtn);
+
+    const cards = $$(".food-card", grid);
+    if (!cards.length) return;
+
+    let index = 0;
+    let timer = null;
+
+    function scrollToIndex(i) {
+      index = (i + cards.length) % cards.length;
+      const target = cards[index];
+      if (!target) return;
+
+      // Scroll so the card's left edge is visible
+      grid.scrollTo({
+        left: target.offsetLeft,
+        top: 0,
+        behavior: "smooth",
+      });
+    }
+
+    function next() { scrollToIndex(index + 1); }
+    function prev() { scrollToIndex(index - 1); }
+
+    function start() {
+      stop();
+      timer = setInterval(next, AUTO_SWIPE_MS);
+    }
+    function stop() {
+      if (timer) clearInterval(timer);
+      timer = null;
+    }
+
+    // Arrows
+    prevBtn.addEventListener("click", () => { prev(); start(); });
+    nextBtn.addEventListener("click", () => { next(); start(); });
+
+    // Restart timer on manual scroll interactions
+    let userScrollTimeout = null;
+    grid.addEventListener("scroll", () => {
+      if (userScrollTimeout) clearTimeout(userScrollTimeout);
+      userScrollTimeout = setTimeout(() => start(), 1200);
+    }, { passive: true });
+
+    // Pause auto-swipe when hovering the grid (nice-to-have)
+    grid.addEventListener("mouseenter", stop);
+    grid.addEventListener("mouseleave", start);
+
+    // Clicking a Chinese card opens details and (naturally) “stops” the carousel focus for the user;
+    // we keep the timer running in background so when modal closes, it continues.
+    grid.addEventListener("click", (e) => {
+      const card = e.target.closest(".food-card");
+      if (!card) return;
+      const name = $("h3", card)?.textContent?.trim() || "item";
+      const url  = ITEM_PAGES_DIR + slugify(name) + ".html";
+      showDetailInModal(url);
+    });
+
+    // Initialize
+    scrollToIndex(0);
+    start();
+
+    // Responsive: when layout changes (e.g., resize), recompute positions
+    let resizeTimer = null;
+    window.addEventListener("resize", () => {
+      if (resizeTimer) clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => scrollToIndex(index), 200);
+    });
+  }
+
+  // ------------------ Hamburger toggle (mobile) ------------------
   function wireHamburger() {
     const hamburger = $(".hamburger");
     const nav = $(".nav-links");
@@ -247,29 +309,15 @@
     });
   }
 
-  // ---------- Make cards focusable for a11y ----------
-  function makeCardsFocusable() {
-    $$(".food-card").forEach((card) => {
-      if (!card.hasAttribute("tabindex")) {
-        card.setAttribute("tabindex", "0");
-        card.setAttribute("role", "button");
-        card.setAttribute("aria-label", `${$("h3", card)?.textContent || "Item"} details`);
-      }
-    });
-  }
-
-  // ---------- Init ----------
+  // ------------------ Init ------------------
   function init() {
-    document.addEventListener("click", onDocumentClick);
-    document.addEventListener("keydown", onDocumentKeydown);
+    wireCardInteractions();
+    wireChineseCarousel();
     wireHamburger();
-    makeCardsFocusable();
-    updateCartBadge();
+    updateCartBadge(); // unique items
   }
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
-  }
+  } else init();
 })();
