@@ -215,58 +215,6 @@ body {
   overflow: hidden;
 }
 
-/* ===== Detailed Item Modal (HOME) ===== */
-#item-modal{
-  position:fixed; inset:0; display:none;
-  align-items:center; justify-content:center;
-  background:rgba(0,0,0,.55); z-index:10000;
-  font: 400 16px/1.5 Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-  color:#e8f2ec;
-}
-#item-modal[aria-hidden="false"]{ display:flex; }
-
-#item-modal #item-modal-card{
-  background:#0f1316;
-  width:94%; max-width:620px;
-  border:1px solid #2a2e35; border-radius:18px;
-  box-shadow:0 22px 70px rgba(0,0,0,.45);
-  overflow:hidden;
-}
-
-/* hero banner */
-#item-modal-hero{
-  height:200px; background:#0b0f12 center/cover no-repeat;
-  display:flex; align-items:center; justify-content:center;
-  color:#9fb8aa; font-size:14px;
-}
-
-/* content */
-#item-modal-title{ margin:0 0 6px; font-size:22px; line-height:1.25; }
-#item-modal-meta{ font-size:13px; color:#9fb8aa; margin:0 0 12px; }
-#item-modal-price{ font-weight:800; font-size:20px; margin-bottom:14px; }
-
-/* qty + buttons row */
-#item-modal .qty-btn{
-  border:1px solid #2a2e35; background:#0b0f12;
-  color:#e8f2ec; border-radius:10px; padding:6px 10px; cursor:pointer;
-}
-#item-modal .qty-val{ min-width:22px; text-align:center; display:inline-block; }
-
-#item-modal-cancel{
-  padding:8px 12px; border-radius:10px;
-  border:1px solid #2a2e35; background:#0b0f12; color:#e8f2ec;
-  cursor:pointer;
-}
-#item-modal-add{
-  padding:8px 14px; border-radius:10px; cursor:pointer;
-  border:none; font-weight:800; color:#032012;
-  background:linear-gradient(90deg,#00ff80,#43ffa9);
-}
-
-/* optional veg/non-veg dot if you add one later */
-#item-modal .veg-dot{ width:10px; height:10px; border-radius:50%; background:#21c55d; box-shadow:0 0 8px rgba(33,197,93,.6); display:inline-block; }
-#item-modal .nonveg-dot{ width:10px; height:10px; border-radius:50%; background:#ff7043; box-shadow:0 0 8px rgba(255,112,67,.6); display:inline-block; }
-
 /* Image area = first child div in card */
 .food-grid-large .food-card > div:first-child {
   width: 100%;

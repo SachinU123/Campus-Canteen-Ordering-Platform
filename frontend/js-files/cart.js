@@ -1,7 +1,7 @@
-/* cart.js — VPP Canteen (rewritten with item-page deep links) */
+/* cart.js — VPP Canteen (rewritten) */
 (function () {
   // ------------------ Config ------------------
-  const API_BASE     = "http://localhost:3001";
+  const API_BASE     = "http://localhost:3001";   // change to deployed backend later
   const CURRENCY     = "₹";
   const PLATFORM_FEE = 0;
   const TAX_RATE     = 0;
@@ -15,8 +15,8 @@
 
   // ------------------ Money & math ------------------
   const INR      = (n) => `${CURRENCY}${Number(n || 0).toFixed(0)}`;
-  const sumItems = (cart) => cart.reduce((s, it) => s + (Number(it.price||0) * Number(it.qty||0)), 0);
-  const totalQty = (cart) => cart.reduce((s, it) => s + Number(it.qty||0), 0);
+  const sumItems = (cart) => cart.reduce((s, it) => s + (it.price * it.qty), 0);
+  const totalQty = (cart) => cart.reduce((s, it) => s + it.qty, 0);
 
   // ------------------ Storage ------------------
   function readCart() {
@@ -28,7 +28,7 @@
     updateBadge(cart);
   }
 
-  // ------------------ Utils ------------------
+  // ------------------ Misc utils ------------------
   const pad2 = (n) => String(n).padStart(2, "0");
   function escapeHtml(s = "") {
     return s.replace(/[&<>"']/g, (m) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
@@ -39,32 +39,6 @@
   function parsePriceText(text) {
     const n = (text || "").replace(/[^\d.]/g, "");
     return Number(n || 0);
-  }
-
-  // ------------------ Catalog helpers (require food-items.js) ------------------
-  const hasCatalog = typeof window.getItem === "function" && typeof window.getItemUrl === "function";
-  function getItemByName(name) {
-    if (!hasCatalog || !name) return null;
-    const want = name.trim().toLowerCase();
-    const list = typeof window.allItems === "function" ? window.allItems() : [];
-    return list.find(it => (it.name||"").trim().toLowerCase() === want) || null;
-  }
-  function resolveCatalogRef(cartItem) {
-    // Prefer direct id → catalog
-    if (hasCatalog && cartItem?.id) {
-      const byId = window.getItem(cartItem.id);
-      if (byId) return byId;
-    }
-    // Try by name when legacy/derived id
-    if (hasCatalog && cartItem?.name) {
-      const byName = getItemByName(cartItem.name);
-      if (byName) return byName;
-    }
-    return null;
-  }
-  function getDetailsUrl(cartItem) {
-    const ref = resolveCatalogRef(cartItem);
-    return ref ? window.getItemUrl(ref.id) : null;
   }
 
   // ------------------ Fetch helper ------------------
@@ -82,7 +56,7 @@
     }
   }
 
-  // ------------------ Server time / IST helpers ------------------
+  // ------------------ Authoritative time (server-preferred) ------------------
   async function getAuthoritativeNowMs(timeoutMs = 2000) {
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), timeoutMs);
@@ -101,7 +75,7 @@
     const clientNow = Date.now();
     const { nowMs: serverNow, source } = await getAuthoritativeNowMs();
     const skewMs = Math.abs(serverNow - clientNow);
-    const SKEW_LIMIT = 2 * 60 * 1000;
+    const SKEW_LIMIT = 2 * 60 * 1000; // 2 minutes
     if (skewMs > SKEW_LIMIT) {
       console.warn("⚠️ Device clock appears skewed by ~", Math.round(skewMs/1000), "s. Using server time.");
       return { baseNowMs: serverNow, used: "server", skewMs };
@@ -111,13 +85,16 @@
   function fmtIST(ts) {
     return new Intl.DateTimeFormat("en-IN", {
       timeZone: "Asia/Kolkata",
-      hour12: true, hour: "2-digit", minute: "2-digit"
+      hour12: true,
+      hour: "2-digit",
+      minute: "2-digit"
     }).format(new Date(ts));
   }
   function timeStringToTodayTs(hhmm) {
     const [h=0, m=0] = (hhmm || "").split(":").map(Number);
     const d = new Date();
-    d.setSeconds(0,0); d.setHours(h, m, 0, 0);
+    d.setSeconds(0,0);
+    d.setHours(h, m, 0, 0);
     return d.getTime();
   }
 
@@ -170,24 +147,15 @@
     const meta = it.meta || `${it.veg ? "Veg" : "Non-veg"} • ${it.time || "20–25 mins"} · ★ 4.5`;
     const desc = it.desc || "";
 
-    // NEW: resolve details link from catalog (by id or by name). If not available, hide link.
-    const detailsUrl = getDetailsUrl(it);
-
     return `
-      <article class="cart-item" data-id="${escapeHtml(it.id)}">
+      <article class="cart-item" data-id="${it.id}">
         <div class="thumb">
           <img src="${it.img || ""}" alt="${escapeHtml(it.alt || it.name)}" loading="lazy">
         </div>
 
-        <div class="content">
+        <div>
           <div class="meta">${vegDot}<span>${escapeHtml(meta)}</span></div>
-
-          <h3 class="name">
-            ${detailsUrl ? `<a class="name-link" href="${detailsUrl}" target="_blank" rel="noopener">` : ``}
-              ${escapeHtml(it.name)}
-            ${detailsUrl ? `</a>` : ``}
-          </h3>
-
+          <h3 class="name">${escapeHtml(it.name)}</h3>
           ${desc ? `<p class="desc">${escapeHtml(desc)}</p>` : ""}
 
           <div class="line">
@@ -203,13 +171,9 @@
 
             <div class="price">${INR(it.price)}</div>
           </div>
-
-          ${detailsUrl ? `<div class="row" style="margin-top:8px">
-            <a class="btn-link" href="${detailsUrl}" target="_blank" rel="noopener">View details page</a>
-          </div>` : ``}
         </div>
 
-        <div class="side">
+        <div style="display:flex; flex-direction:column; gap:10px; align-items:flex-end;">
           <button class="remove" aria-label="Remove item">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M19 7l-1 12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 7m3 0V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M4 7h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
@@ -266,7 +230,7 @@
               || document.querySelector(".nav .tab .badge");
     if (!badge) return;
 
-    // Count unique line items (not total qty)
+    // ✅ Count unique line items, not quantities
     const n = cart.filter(it => (it?.qty || 0) > 0).length;
 
     badge.textContent = n > 99 ? "99+" : String(n);
@@ -278,7 +242,7 @@
     const cart = readCart();
     const i = cart.findIndex((x) => x.id === id);
     if (i < 0) return;
-    cart[i].qty = Math.max(1, Number(cart[i].qty||1) + Number(delta||0));
+    cart[i].qty = Math.max(1, cart[i].qty + delta);
     writeCart(cart);
     renderCart();
   }
@@ -289,7 +253,7 @@
   }
 
   // ------------------ Schedule modal ------------------
-  let scheduledForTs = null;
+  let scheduledForTs = null; // set when scheduling
   function ensureScheduleModal() {
     let modal = $("#schedule-modal");
     if (modal) return modal;
@@ -334,13 +298,16 @@
     const errEl = $("#sched-error");
     if (!input) return;
 
+    // Pick authoritative "now"
     const { baseNowMs } = await detectClockSkewAndPickBaseNow();
 
+    // Allowed window: now+5m ... now+2h
     const MIN_OFFSET = 5 * 60 * 1000;
     const MAX_OFFSET = 2 * 60 * 60 * 1000;
     const minTs = baseNowMs + MIN_OFFSET;
     const maxTs = baseNowMs + MAX_OFFSET;
 
+    // Default = round up to next 5 min
     const roundTo = 5 * 60 * 1000;
     const defTs = Math.ceil(minTs / roundTo) * roundTo;
     const def = new Date(defTs);
@@ -355,15 +322,21 @@
     input.setAttribute("data-max", `${maxH}:${maxM}`);
     if (hint) hint.textContent = `Allowed: ${fmtIST(minTs)} – ${fmtIST(maxTs)} (today, IST)`;
 
+    // Hard clamp typed values to range
     const clamp = () => {
-      const v = input.value; if (!v) return;
+      const v = input.value;
+      if (!v) return;
       const chosen = timeStringToTodayTs(v);
       if (chosen < minTs) {
-        input.value = `${minH}:${minM}`; if (errEl) errEl.textContent = "";
+        input.value = `${minH}:${minM}`;
+        if (errEl) errEl.textContent = "";
       } else if (chosen > maxTs) {
-        input.value = `${maxH}:${maxM}`; if (errEl) errEl.textContent = "";
+        input.value = `${maxH}:${maxM}`;
+        if (errEl) errEl.textContent = "";
       }
     };
+    input.removeEventListener("input", clamp);
+    input.removeEventListener("change", clamp);
     input.addEventListener("input", clamp);
     input.addEventListener("change", clamp);
   }
@@ -391,6 +364,7 @@
       return;
     }
 
+    // Recompute window using authoritative time (prevents DOM tampering)
     const { baseNowMs } = await detectClockSkewAndPickBaseNow();
     const minTs = baseNowMs + 5 * 60 * 1000;
     const maxTs = baseNowMs + 2 * 60 * 60 * 1000;
@@ -418,7 +392,7 @@
     showPaymentModal();
   }
 
-  // ------------------ Payment modal (dummy) ------------------
+  // ------------------ Payment modal (dummy gateway compatible) ------------------
   function ensurePaymentModal() {
     let modal = $("#pay-modal");
     if (modal) return modal;
@@ -483,10 +457,14 @@
     try {
       const cart = readCart();
       if (!cart.length) { alert("Your cart is empty."); return; }
-      if (!navigator.onLine) { alert("You appear to be offline. Please check your internet."); return; }
+      if (!navigator.onLine) {
+        alert("You appear to be offline. Please check your internet.");
+        return;
+      }
 
       const rupees = Math.round(sumItems(cart));
 
+      // 1) Create backend order (dummy or Razorpay)
       const { ok, data } = await fetchJSON(`${API_BASE}/api/create-order`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -497,12 +475,17 @@
         return;
       }
 
+      // 2) Simulate payment success for demo
       const whenText = scheduledForTs ? `Scheduled for ${fmtIST(scheduledForTs)}` : "Order now";
       const confirmed = confirm(
         `Dummy Payment\n\nOrder: ${data.orderId}\nAmount: ₹${rupees}\n${whenText}\n\nPress OK to simulate success.`
       );
-      if (!confirmed) { alert("Dummy payment cancelled."); return; }
+      if (!confirmed) {
+        alert("Dummy payment cancelled.");
+        return;
+      }
 
+      // 3) Verify (dummy always succeeds)
       const ver = await fetchJSON(`${API_BASE}/api/verify`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -513,6 +496,7 @@
         return;
       }
 
+      // 4) Save snapshot (includes scheduled time & estimated ready)
       savePendingOrderSnapshot();
       writeCart([]);
       hidePaymentModal();
@@ -548,7 +532,7 @@
 
   // ------------------ Events ------------------
   function onClick(e) {
-    // Qty controls
+    // Qty
     const incBtn = e.target.closest(".btn-icon[data-action='inc']");
     const decBtn = e.target.closest(".btn-icon[data-action='dec']");
     if (incBtn || decBtn) {
@@ -571,28 +555,21 @@
       return;
     }
 
-    // (Optional) Intercept details link for analytics etc.
-    const nameLink = e.target.closest(".name-link, .btn-link");
-    if (nameLink) {
-      // allow default navigation to the per-item HTML page
-      return;
-    }
-
     // Summary buttons
     const btn = e.target.closest(".summary .btn");
     if (btn) {
       e.preventDefault();
       const label = btn.textContent.trim().toLowerCase();
       if (label.includes("schedule")) {
-        showScheduleModal();
+        showScheduleModal();            // schedule flow
       } else {
-        scheduledForTs = null;
+        scheduledForTs = null;          // immediate flow
         showPaymentModal();
       }
       return;
     }
 
-    // Header nav (if present)
+    // Header nav
     const tab = e.target.closest(".header .nav .tab, .brand");
     if (tab) {
       e.preventDefault();
@@ -605,7 +582,6 @@
       return;
     }
   }
-
   function onKeydown(e) {
     if (!document.activeElement) return;
     const inItem = document.activeElement.closest?.(".cart-item");
@@ -624,22 +600,12 @@
   }
 
   // ------------------ Init ------------------
-  function updateBadge(cart = readCart()) {
-    const badge = document.querySelector(".nav .tab.active .badge")
-              || document.querySelector(".nav .tab .badge");
-    if (!badge) return;
-    const n = cart.filter(it => (it?.qty || 0) > 0).length;
-    badge.textContent = n > 99 ? "99+" : String(n);
-    badge.style.visibility = n ? "visible" : "hidden";
-  }
-
   function updateBadgeAndHealth() {
     updateBadge();
     fetchJSON(`${API_BASE}/api/health`).then(({ ok }) => {
       if (!ok) console.warn("⚠️ Backend health check failed");
     });
   }
-
   function init() {
     seedCartFromDOMIfNeeded();
     renderCart();
