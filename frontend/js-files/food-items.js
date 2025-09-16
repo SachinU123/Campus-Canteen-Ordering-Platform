@@ -1,5 +1,4 @@
-
-    // ---------- Config ----------
+// ---------- Config ----------
     const ITEM = {
       id: "vada-pav",
       name: "Vada Pav",
