@@ -123,17 +123,39 @@
       box-shadow:0 8px 28px rgba(0,0,0,.45), 0 0 24px rgba(0,255,128,.08);
     }
 
-    .thumb{
-      aspect-ratio:1/1; border-radius:12px; overflow:hidden;
-      position:relative; background:linear-gradient(120deg, #1f2228, #121418);
+/* Cart thumbnails: show full image, no crop */
+    .cart-item .thumb{
+      width: 96px;                /* desktop */
+      aspect-ratio: 1 / 1;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #121418;        /* subtle backdrop */
+      display: grid;              /* center the image box */
+      place-items: center;
     }
-    .thumb::after{ /* skeleton shimmer */
-      content:""; position:absolute; inset:0;
-      background:
-        linear-gradient(100deg, transparent 20%, rgba(255,255,255,.06) 40%, transparent 60%);
-      transform:translateX(-100%);
-      animation:shimmer 1.4s infinite;
+
+    /* mobile size matches your existing breakpoint */
+    @media (max-width:600px){
+      .cart-item .thumb{ width: 72px; }
     }
+
+    /* key part: contain (no cropping), keep entire image visible */
+    .cart-item .thumb img{
+      width: 100%;
+      height: 100%;
+      object-fit: contain;        /* ✅ no cropping */
+      object-position: center;
+      display: block;
+      background: transparent;
+      padding: 6px;               /* small letterbox padding so tall/wide images don’t touch edges */
+      border-radius: 0;           /* the container already rounds corners */
+    }
+
+    /* keep the shimmer but don’t block mouse/touch */
+    .cart-item .thumb::after{
+      pointer-events: none;
+    }
+
     @keyframes shimmer{to{transform:translateX(100%)}}
 
     .veg-dot{width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px rgba(0,255,128,.8)}

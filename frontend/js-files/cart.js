@@ -1,7 +1,7 @@
-/* cart.js — VPP Canteen (rewritten) */
+/* cart.js — VPP Canteen (rewritten to ensure item images show) */
 (function () {
   // ------------------ Config ------------------
-  const API_BASE     = "http://localhost:3001";   // change to deployed backend later
+  const API_BASE     = "http://localhost:5500";
   const CURRENCY     = "₹";
   const PLATFORM_FEE = 0;
   const TAX_RATE     = 0;
@@ -15,8 +15,8 @@
 
   // ------------------ Money & math ------------------
   const INR      = (n) => `${CURRENCY}${Number(n || 0).toFixed(0)}`;
-  const sumItems = (cart) => cart.reduce((s, it) => s + (it.price * it.qty), 0);
-  const totalQty = (cart) => cart.reduce((s, it) => s + it.qty, 0);
+  const sumItems = (cart) => cart.reduce((s, it) => s + (Number(it.price || 0) * Number(it.qty || 0)), 0);
+  const totalQty = (cart) => cart.reduce((s, it) => s + Number(it.qty || 0), 0);
 
   // ------------------ Storage ------------------
   function readCart() {
@@ -56,7 +56,7 @@
     }
   }
 
-  // ------------------ Authoritative time (server-preferred) ------------------
+  // ------------------ Authoritative time ------------------
   async function getAuthoritativeNowMs(timeoutMs = 2000) {
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), timeoutMs);
@@ -111,6 +111,29 @@
     return Math.max(...cart.map(parsePrepMinutesFromItem));
   }
 
+  // ------------------ Image resolution (key bit) ------------------
+  // Ensures every line item has a usable image URL.
+  function resolveImage(it) {
+    // 1) If the item already has img, use it.
+    if (it && it.img) return it.img;
+
+    // 2) Try to guess from name (e.g., "Vada Pav" -> "vada-pav.jpg/png/webp")
+    const base = (it?.name || "").toLowerCase().replace(/\s+/g, "-");
+    const candidates = [
+      // `/assets/images/food/${base}.webp`,
+      `/assets/images/food/${base}.jpg`,
+      `/assets/images/food/${base}.png`,
+      // `/images/food/${base}.webp`,
+      `/images/food/${base}.jpg`,
+      `/images/food/${base}.png`,
+    ];
+    // Return the first candidate (let the browser 404 gracefully if missing)
+    if (base) return candidates[0];
+
+    // 3) Fallback placeholder
+    return "/assets/images/food/placeholder.png";
+  }
+
   // ------------------ Cart seed from DOM (fallback) ------------------
   function seedCartFromDOMIfNeeded() {
     const cart = readCart();
@@ -139,24 +162,39 @@
   }
 
   // ------------------ Rendering ------------------
-  function itemHTML(it) {
+  function itemHTML(itRaw) {
+    // Normalize item
+    const it = {
+      id: itRaw.id || safeId(itRaw.name, itRaw.price),
+      name: itRaw.name || "Item",
+      price: Number(itRaw.price || 0),
+      qty: Math.max(1, Number(itRaw.qty || 1)),
+      img: resolveImage(itRaw),
+      alt: itRaw.alt || itRaw.name || "Item",
+      meta: itRaw.meta,
+      time: itRaw.time,
+      veg: !!itRaw.veg,
+      desc: itRaw.desc || ""
+    };
+
+    // console.log(it.img)
+
     const vegDot = it.veg
       ? `<span class="veg-dot" aria-hidden="true"></span>`
       : `<span style="width:10px;height:10px;border-radius:50%;background:#ff7043;box-shadow:0 0 8px rgba(255,112,67,.8)"></span>`;
 
     const meta = it.meta || `${it.veg ? "Veg" : "Non-veg"} • ${it.time || "20–25 mins"} · ★ 4.5`;
-    const desc = it.desc || "";
 
     return `
-      <article class="cart-item" data-id="${it.id}">
+      <article class="cart-item" data-id="${escapeHtml(it.id)}">
         <div class="thumb">
-          <img src="${it.img || ""}" alt="${escapeHtml(it.alt || it.name)}" loading="lazy">
+          <img src="${escapeHtml(it.img)}" alt="${escapeHtml(it.alt)}" loading="lazy">
         </div>
 
         <div>
           <div class="meta">${vegDot}<span>${escapeHtml(meta)}</span></div>
           <h3 class="name">${escapeHtml(it.name)}</h3>
-          ${desc ? `<p class="desc">${escapeHtml(desc)}</p>` : ""}
+          ${it.desc ? `<p class="desc">${escapeHtml(it.desc)}</p>` : ""}
 
           <div class="line">
             <div class="qty" role="group" aria-label="Quantity">
@@ -176,7 +214,7 @@
         <div style="display:flex; flex-direction:column; gap:10px; align-items:flex-end;">
           <button class="remove" aria-label="Remove item">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M19 7l-1 12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 7m3 0V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M4 7h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M19 7l-1 12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 7m3 0V5a2 2 0 0 1 2-2h4a 2 2 0 0 1 2 2v2M4 7h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
             Remove
           </button>
@@ -190,7 +228,16 @@
     const container = $(".items");
     if (!container) return;
 
-    const cart = readCart();
+    // Clean & normalize the cart before rendering
+    const raw = readCart();
+    const cart = raw
+      .map(it => ({
+        ...it,
+        qty: Math.max(1, Number(it.qty || 1)),
+        price: Number(it.price || 0),
+        img: resolveImage(it)
+      }))
+      .filter(it => it.name && it.price >= 0);
 
     if (cart.length === 0) {
       container.innerHTML = `
@@ -229,10 +276,7 @@
     const badge = document.querySelector(".nav .tab.active .badge")
               || document.querySelector(".nav .tab .badge");
     if (!badge) return;
-
-    // ✅ Count unique line items, not quantities
-    const n = cart.filter(it => (it?.qty || 0) > 0).length;
-
+    const n = cart.filter(it => (Number(it?.qty) || 0) > 0).length;
     badge.textContent = n > 99 ? "99+" : String(n);
     badge.style.visibility = n ? "visible" : "hidden";
   }
@@ -242,7 +286,7 @@
     const cart = readCart();
     const i = cart.findIndex((x) => x.id === id);
     if (i < 0) return;
-    cart[i].qty = Math.max(1, cart[i].qty + delta);
+    cart[i].qty = Math.max(1, Number(cart[i].qty || 1) + delta);
     writeCart(cart);
     renderCart();
   }
@@ -253,7 +297,7 @@
   }
 
   // ------------------ Schedule modal ------------------
-  let scheduledForTs = null; // set when scheduling
+  let scheduledForTs = null;
   function ensureScheduleModal() {
     let modal = $("#schedule-modal");
     if (modal) return modal;
@@ -298,16 +342,13 @@
     const errEl = $("#sched-error");
     if (!input) return;
 
-    // Pick authoritative "now"
     const { baseNowMs } = await detectClockSkewAndPickBaseNow();
 
-    // Allowed window: now+5m ... now+2h
     const MIN_OFFSET = 5 * 60 * 1000;
     const MAX_OFFSET = 2 * 60 * 60 * 1000;
     const minTs = baseNowMs + MIN_OFFSET;
     const maxTs = baseNowMs + MAX_OFFSET;
 
-    // Default = round up to next 5 min
     const roundTo = 5 * 60 * 1000;
     const defTs = Math.ceil(minTs / roundTo) * roundTo;
     const def = new Date(defTs);
@@ -322,7 +363,6 @@
     input.setAttribute("data-max", `${maxH}:${maxM}`);
     if (hint) hint.textContent = `Allowed: ${fmtIST(minTs)} – ${fmtIST(maxTs)} (today, IST)`;
 
-    // Hard clamp typed values to range
     const clamp = () => {
       const v = input.value;
       if (!v) return;
@@ -364,7 +404,6 @@
       return;
     }
 
-    // Recompute window using authoritative time (prevents DOM tampering)
     const { baseNowMs } = await detectClockSkewAndPickBaseNow();
     const minTs = baseNowMs + 5 * 60 * 1000;
     const maxTs = baseNowMs + 2 * 60 * 60 * 1000;
@@ -392,7 +431,7 @@
     showPaymentModal();
   }
 
-  // ------------------ Payment modal (dummy gateway compatible) ------------------
+  // ------------------ Payment modal (dummy) ------------------
   function ensurePaymentModal() {
     let modal = $("#pay-modal");
     if (modal) return modal;
@@ -464,7 +503,6 @@
 
       const rupees = Math.round(sumItems(cart));
 
-      // 1) Create backend order (dummy or Razorpay)
       const { ok, data } = await fetchJSON(`${API_BASE}/api/create-order`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -475,7 +513,6 @@
         return;
       }
 
-      // 2) Simulate payment success for demo
       const whenText = scheduledForTs ? `Scheduled for ${fmtIST(scheduledForTs)}` : "Order now";
       const confirmed = confirm(
         `Dummy Payment\n\nOrder: ${data.orderId}\nAmount: ₹${rupees}\n${whenText}\n\nPress OK to simulate success.`
@@ -485,7 +522,6 @@
         return;
       }
 
-      // 3) Verify (dummy always succeeds)
       const ver = await fetchJSON(`${API_BASE}/api/verify`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -496,7 +532,6 @@
         return;
       }
 
-      // 4) Save snapshot (includes scheduled time & estimated ready)
       savePendingOrderSnapshot();
       writeCart([]);
       hidePaymentModal();
@@ -511,8 +546,8 @@
   function savePendingOrderSnapshot() {
     const items = readCart().map(it => ({
       name:  it.name,
-      qty:   it.qty  || 1,
-      price: it.price || 0,
+      qty:   Number(it.qty || 1),
+      price: Number(it.price || 0),
       time:  it.time || ""
     }));
     if (!items.length) return;
@@ -561,9 +596,9 @@
       e.preventDefault();
       const label = btn.textContent.trim().toLowerCase();
       if (label.includes("schedule")) {
-        showScheduleModal();            // schedule flow
+        showScheduleModal();
       } else {
-        scheduledForTs = null;          // immediate flow
+        scheduledForTs = null;
         showPaymentModal();
       }
       return;

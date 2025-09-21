@@ -166,36 +166,15 @@ body {
   background: #00cc66;
 }
 
-/* Top Picks images (square) */
-.food-card .food-img,
-.food-card .food-img1,
-.food-card .food-img2,
-.food-card .food-img3,
-.food-card .food-img4,
-.food-card .food-img5,
-.food-card .food-img6,
-.food-card .food-img7,
-.food-card .food-img8,
-.food-card .food-img9 {
+/* Image slots (generic). Backgrounds set from HTML via JS using data-img */
+.food-card .food-img {
   width: 100%;
-  aspect-ratio: 1 / 1;     /* perfect square */
-  background-size: cover;  /* fill without distortion */
+  aspect-ratio: 1 / 1;      /* Top picks: square */
+  background-size: cover;
   background-position: center;
   border-radius: 8px;
   margin-bottom: 10px;
 }
-
-/* Bind images (use your existing paths) */
-.food-img  { background-image: url('../assets/images/vegnoodles.jpg'); }
-.food-img1 { background-image: url('../assets/images/chickenbiryani.jpg'); }
-.food-img2 { background-image: url('../assets/images/pav-bhaji.jpg'); }
-.food-img3 { background-image: url('../assets/images/dahi-wada.jpg'); }
-.food-img4 { background-image: url('../assets/images/idli.jpg'); }
-.food-img5 { background-image: url('../assets/images/dosachutney.jpg'); }
-.food-img6 { background-image: url('../assets/images/Paneer\ Fried\ Rice.jpg'); }
-.food-img7 { background-image: url('../assets/images/vadasam.jpg'); }
-.food-img8 { background-image: url('../assets/images/vadapav.jpg'); }
-.food-img9 { background-image: url('../assets/images/paneerbiryani.jpg'); }
 
 /* Chinese Grid (Swiggy-style) */
 .food-grid-large {
@@ -215,13 +194,14 @@ body {
   overflow: hidden;
 }
 
-/* Image area = first child div in card */
-.food-grid-large .food-card > div:first-child {
-  width: 100%;
-  height: 200px;         /* banner height */
+/* Override image shape for Chinese grid (banner height) */
+.food-grid-large .food-card .food-img {
+  height: 200px;
+  aspect-ratio: auto;        /* disable square in this context */
   background-size: cover;
   background-position: center;
   border-radius: 12px 12px 0 0;
+  margin-bottom: 0;
 }
 
 /* Content padding inside Chinese cards */
@@ -238,14 +218,6 @@ body {
 .food-grid-large .food-card .time,
 .food-grid-large .food-card .rating { margin-bottom: 6px; }
 .food-grid-large .food-card .add-btn { margin-top: 10px; margin-bottom: 15px; }
-
-/* Chinese images binding */
-.food-img10 { background-image: url('../assets/images/vegnoodles.jpg'); }
-.food-img11 { background-image: url('../assets/images/loginimagehc.png'); }
-.food-img12 { background-image: url('../assets/images/egg\ noodles.jpeg'); }
-.food-img13 { background-image: url('../assets/images/chicken\ manchurian.jpg'); }
-.food-img14 { background-image: url('../assets/images/chicken\ fried\ rice.jpg'); }
-.food-img15 { background-image: url('../assets/images/veg-fried-rice.jpg'); }
 
 /* Footer */
 .footer {
@@ -322,7 +294,7 @@ body {
   }
 
   /* Larger banner for better feel on mobile (optional) */
-  .food-grid-large .food-card > div:first-child {
+  .food-grid-large .food-card .food-img {
     height: 220px;
   }
 }
