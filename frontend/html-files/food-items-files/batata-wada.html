@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Vada Pav • VPP Canteen</title>
+  <title>Batata Wada • VPP Canteen</title>
   <meta name="theme-color" content="#0b0b0f" />
   <link rel="stylesheet" href="../../css-files/food-item.css">
   <script src="../../js-files/food-items.js" defer></script>
@@ -16,11 +16,11 @@
   </header>
 
   <div class="wrap" role="dialog" aria-modal="true" aria-labelledby="title">
-    <article class="sheet" id="item-vada-pav" itemscope itemtype="https://schema.org/MenuItem">
+    <article class="sheet" id="item-batata-wada" itemscope itemtype="https://schema.org/MenuItem">
       <!-- Cover -->
       <div class="hero">
-        <!-- Replace src with your CDN image -->
-        <img src="/images/food/vada-pav-hero.jpg" alt="Vada Pav" loading="eager" itemprop="image">
+        <!-- Keep path; change only filename per your assets -->
+        <img src="../../assets/images/common_food.jpg" data-img="/frontend/assets/images/common_food.jpg" alt="Vada Pav" loading="eager" itemprop="image" onerror="this.src='../../assets/images/common_food.jpg'">
         <button class="back" type="button" id="closeBtn" aria-label="Close">
           <span aria-hidden="true">✕</span> Close
         </button>
@@ -43,7 +43,14 @@
         </div>
 
         <div class="statline">
-          <div class="stat"><div class="k">Price</div><div class="v" id="price">₹<span itemprop="offers" itemscope itemtype="https://schema.org/Offer"><span itemprop="price">40</span></span></div></div>
+          <div class="stat">
+            <div class="k">Price</div>
+            <div class="v" id="price">
+              ₹<span itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+                <span itemprop="price">40</span>
+              </span>
+            </div>
+          </div>
           <div class="stat"><div class="k">Calories</div><div class="v" id="calories">200 kcal</div></div>
           <div class="stat"><div class="k">Prep time</div><div class="v" id="prep">5-7 mins</div></div>
         </div>
@@ -51,16 +58,14 @@
         <section class="section">
           <h3>Description</h3>
           <p class="muted" itemprop="description">
-            Maharashtra’s beloved snack: spiced mashed potato balls dipped in gram flour batter, 
-            deep-fried to golden perfection, and served with chutneys and fried chillies.
-
+            Maharashtra’s beloved snack: spiced mashed potato balls (batata wada) dipped in gram-flour batter,
+            deep-fried till crisp and served hot with chutneys and fried green chillies.
           </p>
         </section>
 
         <section class="section">
           <h3>Add-ons (optional)</h3>
           <div class="addons">
-            <!-- Placeholders you can edit or generate dynamically -->
             <div class="addon"><span>Cheese slice</span><span class="price">+ ₹10</span></div>
             <div class="addon"><span>Extra chutney</span><span class="price">+ ₹5</span></div>
             <div class="addon"><span>Fried green chilli</span><span class="price">+ ₹5</span></div>

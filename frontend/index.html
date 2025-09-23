@@ -6,6 +6,7 @@
   <title>Vpp Canteen - Home</title>
   <link rel="stylesheet" href="css-files/homestyle.css"/>
   <link rel="stylesheet" href="css-files/menu.css">
+  <!-- Keep your existing JS files if they handle cart, etc. -->
   <script src="js-files/home.js" defer></script>
   <script src="js-files/food-items.js" defer></script>
 </head>
@@ -28,10 +29,8 @@
     <nav class="nav-links" aria-label="Primary">
       <a href="index.html">Home</a>
       <a href="html-files/menu.html">Menu</a>
-      <a href="html-files/bulk-order.html">Bulk Order</a>
       <a href="html-files/orders.html">Orders</a>
       <a href="html-files/cart.html" class="cart-btn">🛒 Cart</a>
-      <a href="html-files/admin.html">Admin</a>
     </nav>
   </header>
 
@@ -43,8 +42,8 @@
       <div class="food-scroll">
         <!-- Food Card (Top Picks use square thumbs) -->
         <div class="food-card">
-          <div class="food-img"></div>
-          <h3>Veg Noodles</h3>
+          <div class="food-img" data-img="assets/images/vegnoodles.jpg"></div>
+          <h3>Noodles</h3>
           <p class="price">₹50</p>
           <p class="time">⏱ 10-15 mins</p>
           <p class="rating">⭐ 4.0</p>
@@ -52,7 +51,7 @@
         </div>
 
         <div class="food-card">
-          <div class="food-img1"></div>
+          <div class="food-img" data-img="assets/images/kolhabiryani.jpg"></div>
           <h3>Kolhapuri Biryani</h3>
           <p class="price">₹120</p>
           <p class="time">⏱ 15-20 mins</p>
@@ -61,7 +60,7 @@
         </div>
 
         <div class="food-card">
-          <div class="food-img2"></div>
+          <div class="food-img" data-img="assets/images/pav-bhaji.jpg"></div>
           <h3>Pav Bhaji</h3>
           <p class="price">₹50</p>
           <p class="time">⏱ 10-15 mins</p>
@@ -70,7 +69,7 @@
         </div>
 
         <div class="food-card">
-          <div class="food-img3"></div>
+          <div class="food-img" data-img="assets/images/dahi-wada.jpg"></div>
           <h3>Dahi Wada</h3>
           <p class="price">₹45</p>
           <p class="time">⏱ 10-15 mins</p>
@@ -79,8 +78,8 @@
         </div>
 
         <div class="food-card">
-          <div class="food-img4"></div>
-          <h3>Idli</h3>
+          <div class="food-img" data-img="assets/images/idli.jpg"></div>
+          <h3>Idli Sambhar</h3>
           <p class="price">₹40</p>
           <p class="time">⏱ 10-15 mins</p>
           <p class="rating">⭐ 4.0</p>
@@ -88,8 +87,8 @@
         </div>
 
         <div class="food-card">
-          <div class="food-img5"></div>
-          <h3>Dosa</h3>
+          <div class="food-img" data-img="assets/images/dosachutney.jpg"></div>
+          <h3>Sadha Dosa</h3>
           <p class="price">₹50</p>
           <p class="time">⏱ 10-15 mins</p>
           <p class="rating">⭐ 4.0</p>
@@ -97,8 +96,8 @@
         </div>
 
         <div class="food-card">
-          <div class="food-img6"></div>
-          <h3>Paneer Fried Rice</h3>
+          <div class="food-img" data-img="assets/images/Paneer Fried Rice.jpg"></div>
+          <h3>Paneer Pulao</h3>
           <p class="price">₹120</p>
           <p class="time">⏱ 15-20 mins</p>
           <p class="rating">⭐ 4.0</p>
@@ -106,8 +105,8 @@
         </div>
 
         <div class="food-card">
-          <div class="food-img7"></div>
-          <h3>Vada</h3>
+          <div class="food-img" data-img="assets/images/vadasam.jpg"></div>
+          <h3>Medu Wada</h3>
           <p class="price">₹40</p>
           <p class="time">⏱ 10-15 mins</p>
           <p class="rating">⭐ 4.5</p>
@@ -115,7 +114,7 @@
         </div>
 
         <div class="food-card">
-          <div class="food-img8"></div>
+          <div class="food-img" data-img="assets/images/vadapav.jpg"></div>
           <h3>Vada Pav</h3>
           <p class="price">₹15</p>
           <p class="time">⏱ 5 -10 mins</p>
@@ -124,7 +123,7 @@
         </div>
 
         <div class="food-card">
-          <div class="food-img9"></div>
+          <div class="food-img" data-img="assets/images/paneerbiryani.jpg"></div>
           <h3>Paneer Biryani</h3>
           <p class="price">₹120</p>
           <p class="time">⏱ 20-25 mins</p>
@@ -142,7 +141,7 @@
     <!-- 3x3 on desktop, 2 cols tablet, 1 col mobile -->
     <div class="food-grid-large">
       <div class="food-card">
-        <div class="food-img10"></div>
+        <div class="food-img" data-img="assets/images/veg-fried-rice.jpg"></div>
         <h3>Veg Fried Rice</h3>
         <p class="price">₹40</p>
         <p class="time">⏱ 10-15 mins</p>
@@ -151,7 +150,7 @@
       </div>
 
       <div class="food-card">
-        <div class="food-img11"></div>
+        <div class="food-img" data-img="assets/images/loginimagehc.png"></div>
         <h3>Chicken Fried Rice</h3>
         <p class="price">₹120</p>
         <p class="time">⏱ 15-20 mins</p>
@@ -160,7 +159,7 @@
       </div>
 
       <div class="food-card">
-        <div class="food-img12"></div>
+        <div class="food-img" data-img="assets/images/egg noodles.jpeg"></div>
         <h3>Veg Schezwan Fried Rice</h3>
         <p class="price">₹50</p>
         <p class="time">⏱ 15-20 mins</p>
@@ -169,7 +168,7 @@
       </div>
 
       <div class="food-card">
-        <div class="food-img13"></div>
+        <div class="food-img" data-img="assets/images/chicken manchurian.jpg"></div>
         <h3>Chicken Schezwan Fried Rice</h3>
         <p class="price">₹60</p>
         <p class="time">⏱ 15-20 mins</p>
@@ -178,7 +177,7 @@
       </div>
 
       <div class="food-card">
-        <div class="food-img14"></div>
+        <div class="food-img" data-img="assets/images/chicken fried rice.jpg"></div>
         <h3>Chicken Noodles</h3>
         <p class="price">₹50</p>
         <p class="time">⏱ 15-20 mins</p>
@@ -187,7 +186,7 @@
       </div>
 
       <div class="food-card">
-        <div class="food-img15"></div>
+        <div class="food-img" data-img="assets/images/veg-fried-rice.jpg"></div>
         <h3>Chicken Schezwan Noodles</h3>
         <p class="price">₹60</p>
         <p class="time">⏱ 15-20 mins</p>
@@ -214,10 +213,17 @@
     // Mobile menu toggle
     const hamburger = document.querySelector('.hamburger');
     const nav = document.querySelector('.nav-links');
-
     hamburger.addEventListener('click', () => {
       const isOpen = nav.classList.toggle('show');
       hamburger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+
+    // Hydrate background images from data-img (remove if you already do this in home.js)
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.food-card .food-img').forEach(el => {
+        const src = el.dataset.img;
+        if (src) el.style.backgroundImage = `url('${src}')`;
+      });
     });
   </script>
 </body>

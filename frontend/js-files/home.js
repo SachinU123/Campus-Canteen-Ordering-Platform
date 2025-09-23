@@ -1,17 +1,38 @@
-/* home.js — VPP Canteen (unique badge count, iframe details, Chinese auto-swipe with arrows, no dots) */
+/* home.js — VPP Canteen (stable modal add, no nav, robust IDs, absolute images, unique badge) */
 (function () {
   // ------------------ Config ------------------
   const ITEM_PAGES_DIR = "html-files/food-items-files/"; // relative to index.html
   const CART_KEY = "vpp_canteen_cart";
-  const AUTO_SWIPE_MS = 5000; // Chinese carousel: 5 seconds
+  const AUTO_SWIPE_MS = 5000;
 
   // ------------------ Tiny DOM helpers ------------------
   const $  = (sel, ctx = document) => ctx.querySelector(sel);
   const $$ = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
 
   // ------------------ Utils ------------------
-  const parsePrice = (text) => Number((text || "").replace(/[^\d.]/g, "") || 0);
-  const slugify    = (s="") => s.toLowerCase().trim().replace(/\s+/g, "-").replace(/[^a-z0-9\-]/g, "");
+  const parsePrice = (text) =>
+    Number((text || "").replace(/[^\d.]/g, "") || 0);
+
+  const slugify = (s = "") =>
+    s.toLowerCase().trim().replace(/\s+/g, "-").replace(/[^a-z0-9\-]/g, "");
+
+  const INR = (n) => `₹${Number(n || 0).toFixed(0)}`;
+
+  function toAbsoluteURL(src = "") {
+    try { return new URL(src, document.baseURI).href; }
+    catch { return src || "/assets/images/food/placeholder.png"; }
+  }
+
+  function basenameNoExt(url = "") {
+    try {
+      const u = new URL(url, document.baseURI);
+      const base = u.pathname.split("/").pop() || "";
+      return base.replace(/\.[a-z0-9]+$/i, "");
+    } catch {
+      const base = (url.split("/").pop() || "");
+      return base.replace(/\.[a-z0-9]+$/i, "");
+    }
+  }
 
   // ------------------ Storage ------------------
   function readCart() {
@@ -23,20 +44,17 @@
     updateCartBadge(cart);
   }
 
-  // ------------------ Cart badge (UNIQUE items, not quantities) ------------------
+  // ------------------ Cart badge (UNIQUE items only) ------------------
   function updateCartBadge(cart = readCart()) {
-    // Prefer your existing nav cart button
     const cartBtn = $(".cart-btn");
     if (!cartBtn) return;
 
     let badge = cartBtn.querySelector(".cart-badge");
-    // Unique items = number of line items with qty > 0
-    const uniqueCount = cart.filter(it => (it?.qty || 0) > 0).length;
+    const uniqueCount = cart.filter(it => (Number(it?.qty) || 0) > 0).length;
 
     if (!badge) {
       badge = document.createElement("span");
       badge.className = "cart-badge";
-      // Minimal inline styles so this works without extra CSS
       badge.style.cssText =
         "display:inline-flex;min-width:18px;height:18px;padding:0 5px;border-radius:9px;align-items:center;justify-content:center;font-size:11px;background:#e11d48;color:#fff;margin-left:6px;line-height:18px;";
       cartBtn.appendChild(badge);
@@ -78,23 +96,73 @@
 
   // ------------------ Cart ops ------------------
   function addToCart(item) {
+    // Normalize minimal schema
+    const clean = {
+      id: String(item.id || ""),
+      name: String(item.name || "Item"),
+      price: Number(item.price || 0),
+      img: toAbsoluteURL(item.img || ""),
+      veg: !!item.veg,
+      meta: item.meta || "",
+      time: item.time || "",
+      desc: item.desc || "",
+    };
+
     const cart = readCart();
-    const idx = cart.findIndex(x => x.id === item.id);
-    if (idx >= 0) cart[idx].qty += 1;
-    else cart.push({ ...item, qty: 1 });
+    const idx = cart.findIndex(x => x.id === clean.id);
+    if (idx >= 0) {
+      cart[idx].qty = Math.max(1, Number(cart[idx].qty || 1) + 1);
+      // backfill any missing fields
+      cart[idx].img  = cart[idx].img  || clean.img;
+      cart[idx].veg  = (cart[idx].veg ?? clean.veg) ?? false;
+      cart[idx].meta = cart[idx].meta || clean.meta;
+      cart[idx].time = cart[idx].time || clean.time;
+      cart[idx].desc = cart[idx].desc || clean.desc;
+    } else {
+      cart.push({ ...clean, qty: 1 });
+    }
     writeCart(cart);
-    toast(`${item.name} added to cart`);
+    updateCartBadge(cart);
+    toast(`${clean.name} added • ${INR(clean.price)}`);
   }
 
   // ------------------ Item parsing from cards ------------------
   function getCardItem(card) {
     const title = $("h3", card)?.textContent?.trim() || "Item";
     const price = parsePrice($(".price", card)?.textContent || "0");
-    const id = `${slugify(title)}--${price}`;
-    return { id, name: title, price };
+    const veg = !!$(".veg-dot", card);
+    const meta = $(".meta", card)?.textContent?.trim() || "";
+    const time = $(".time", card)?.textContent?.trim() || "";
+    const desc = $(".desc", card)?.textContent?.trim() || "";
+
+    const imgEl = $("img", card);
+    const imgContainer = $(".food-img", card);
+
+    const fromData = imgContainer?.dataset?.img || "";
+    const fromImgTag = imgEl?.getAttribute("src") || "";
+
+    const fromBg = (() => {
+      if (!imgContainer) return "";
+      const s = getComputedStyle(imgContainer).backgroundImage || "";
+      const m = s.match(/url\((?:'|")?(.*?)(?:'|")?\)/i);
+      return m ? m[1] : "";
+    })();
+
+    const relOrAbs = fromData || fromImgTag || fromBg || `assets/images/${slugify(title)}.jpg`;
+    const imgAbs = toAbsoluteURL(relOrAbs);
+    const imgBase = basenameNoExt(imgAbs);
+
+    // Prefer explicit data-id / data-sku; else stable fallback including price & image base
+    const cards = $$(".food-card");
+    const index = Math.max(0, cards.indexOf(card));
+    const dataId = card.getAttribute("data-id") || card.getAttribute("data-sku");
+    const fallbackId = `${slugify(title)}--${price}--${index}--${imgBase}`;
+    const id = (dataId && String(dataId).trim()) || fallbackId;
+
+    return { id, name: title, price, img: imgAbs, veg, meta, time, desc };
   }
 
-  // ------------------ IFRAME modal for detail pages (self-contained) ------------------
+  // ------------------ Modal (iframe) ------------------
   function ensureModal() {
     let modal = document.getElementById("menu-item-modal");
     if (modal) return modal;
@@ -131,7 +199,7 @@
   function showDetailInModal(url) {
     const modal = ensureModal();
     const frame = modal.querySelector("#mi-frame");
-    frame.src = url;
+    frame.src = url.includes("?") ? `${url}&modal=1` : `${url}?modal=1`;
     modal.style.display = "flex";
     modal.setAttribute("aria-hidden", "false");
   }
@@ -144,20 +212,21 @@
     modal.setAttribute("aria-hidden", "true");
   }
 
-  // ------------------ Click/Key handling (Add to Cart + open details) ------------------
+  // ------------------ Click/Key handling ------------------
   function wireCardInteractions() {
     document.addEventListener("click", (e) => {
-      // Add to cart button
+      // Add to cart from grid card
       const addBtn = e.target.closest(".add-btn");
       if (addBtn) {
+        e.preventDefault();
+        e.stopPropagation();
         const card = addBtn.closest(".food-card");
         if (!card) return;
-        const item = getCardItem(card);
-        addToCart(item);
+        addToCart(getCardItem(card)); // no navigation, shows toast, updates badge
         return;
       }
 
-      // Click on card itself (but not on the 'Add' button) -> open detail page in modal
+      // Open detail modal when clicking card (but not the Add button)
       const card = e.target.closest(".food-card");
       if (card && !e.target.closest(".add-btn")) {
         const name = $("h3", card)?.textContent?.trim() || "item";
@@ -165,11 +234,9 @@
         showDetailInModal(url);
         return;
       }
-
-      // Navbar (mobile): handled by existing inline script in index OR handled elsewhere
     });
 
-    // Keyboard accessibility for cards
+    // Accessibility: Enter/Space opens modal
     $$(".food-card").forEach((card) => {
       if (!card.hasAttribute("tabindex")) card.setAttribute("tabindex", "0");
       card.setAttribute("role", "link");
@@ -190,22 +257,40 @@
     });
   }
 
-  // ------------------ Chinese auto-swipe (arrows, no dots) ------------------
-  // Works with your existing .food-sec (Chinese section) and .food-grid-large container.
-  // We keep the cards/styles, and simply scroll the container to the next card every 5s.
+  // ------------------ Same-origin postMessage bridge from item pages ------------------
+  function wirePostMessageBridge() {
+    window.addEventListener("message", (event) => {
+      // Only accept messages from the same origin
+      try {
+        const sameOrigin = new URL(event.origin).origin === new URL(document.baseURI).origin;
+        if (!sameOrigin) return;
+      } catch {
+        // Be strict: ignore if anything looks off
+        return;
+      }
+
+      const data = event.data;
+      if (!data || typeof data !== "object") return;
+
+      // Supported message: { type: 'VPP_ADD_TO_CART', item: {id,name,price,img,veg,meta,time,desc} }
+      if (data.type === "VPP_ADD_TO_CART" && data.item) {
+        addToCart(data.item);            // updates badge + toast
+        // Keep modal open (Option A) — do not close.
+      }
+    });
+  }
+
+  // ------------------ Auto-swipe carousel (Chinese section) ------------------
   function wireChineseCarousel() {
     const section = document.querySelector(".food-sec");
     const grid = section?.querySelector(".food-grid-large");
     if (!grid) return;
 
-    // Make container horizontally scrollable without changing your card styles
     grid.style.overflowX = "auto";
     grid.style.scrollBehavior = "smooth";
-    grid.style.scrollSnapType = "x mandatory"; // gentle snap
-    // Each card snaps (best-effort)
+    grid.style.scrollSnapType = "x mandatory";
     $$(".food-card", grid).forEach((c) => (c.style.scrollSnapAlign = "start"));
 
-    // Create arrows (no dots)
     const mkBtn = (label, dir) => {
       const b = document.createElement("button");
       b.type = "button";
@@ -222,7 +307,6 @@
       return b;
     };
 
-    // Ensure section is positioned so arrows can overlay
     section.style.position = section.style.position || "relative";
     const prevBtn = mkBtn("Previous", "prev");
     const nextBtn = mkBtn("Next", "next");
@@ -232,51 +316,31 @@
     const cards = $$(".food-card", grid);
     if (!cards.length) return;
 
-    let index = 0;
-    let timer = null;
+    let index = 0, timer = null;
 
     function scrollToIndex(i) {
       index = (i + cards.length) % cards.length;
       const target = cards[index];
       if (!target) return;
-
-      // Scroll so the card's left edge is visible
-      grid.scrollTo({
-        left: target.offsetLeft,
-        top: 0,
-        behavior: "smooth",
-      });
+      grid.scrollTo({ left: target.offsetLeft, top: 0, behavior: "smooth" });
     }
-
     function next() { scrollToIndex(index + 1); }
     function prev() { scrollToIndex(index - 1); }
+    function start() { stop(); timer = setInterval(next, AUTO_SWIPE_MS); }
+    function stop()  { if (timer) clearInterval(timer); timer = null; }
 
-    function start() {
-      stop();
-      timer = setInterval(next, AUTO_SWIPE_MS);
-    }
-    function stop() {
-      if (timer) clearInterval(timer);
-      timer = null;
-    }
-
-    // Arrows
     prevBtn.addEventListener("click", () => { prev(); start(); });
     nextBtn.addEventListener("click", () => { next(); start(); });
 
-    // Restart timer on manual scroll interactions
     let userScrollTimeout = null;
     grid.addEventListener("scroll", () => {
       if (userScrollTimeout) clearTimeout(userScrollTimeout);
       userScrollTimeout = setTimeout(() => start(), 1200);
     }, { passive: true });
 
-    // Pause auto-swipe when hovering the grid (nice-to-have)
     grid.addEventListener("mouseenter", stop);
     grid.addEventListener("mouseleave", start);
 
-    // Clicking a Chinese card opens details and (naturally) “stops” the carousel focus for the user;
-    // we keep the timer running in background so when modal closes, it continues.
     grid.addEventListener("click", (e) => {
       const card = e.target.closest(".food-card");
       if (!card) return;
@@ -285,11 +349,9 @@
       showDetailInModal(url);
     });
 
-    // Initialize
     scrollToIndex(0);
     start();
 
-    // Responsive: when layout changes (e.g., resize), recompute positions
     let resizeTimer = null;
     window.addEventListener("resize", () => {
       if (resizeTimer) clearTimeout(resizeTimer);
@@ -309,15 +371,27 @@
     });
   }
 
+  // ------------------ Image hydration (backgrounds from data-img) ------------------
+  function hydrateCardImages() {
+    $$(".food-card .food-img").forEach(el => {
+      const src = el.dataset.img;
+      if (src) el.style.backgroundImage = `url('${toAbsoluteURL(src)}')`;
+    });
+  }
+
   // ------------------ Init ------------------
   function init() {
+    hydrateCardImages();
     wireCardInteractions();
     wireChineseCarousel();
     wireHamburger();
-    updateCartBadge(); // unique items
+    wirePostMessageBridge();
+    updateCartBadge(); // show unique-item badge on load
   }
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-  } else init();
+    document.addEventListener("DOMContentLoaded", init, { once: true });
+  } else {
+    init();
+  }
 })();

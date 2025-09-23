@@ -22,7 +22,7 @@ body {
   padding: 10px 20px;
   z-index: 1000;
   border-bottom: 2px solid #00ff80;
-  flex-wrap: nowrap; /* keep single row on desktop */
+  flex-wrap: nowrap;          /* keep single row on desktop */
 }
 
 .loginnamecon {
@@ -133,7 +133,7 @@ body {
 /* Common Card */
 .food-card {
   flex: 0 0 auto; /* needed for scroll row */
-  width: 220px; /* Top Picks card width (overridden in Chinese grid) */
+  width: 220px;   /* Top Picks card width (overridden in Chinese grid) */
   background: #222;
   border-radius: 12px;
   padding: 15px;
@@ -146,9 +146,7 @@ body {
   box-shadow: 0 0 20px #00ff80;
 }
 
-.price,
-.time,
-.rating {
+.price, .time, .rating {
   margin: 5px 0;
 }
 
@@ -168,55 +166,14 @@ body {
   background: #00cc66;
 }
 
-/* Top Picks images (square) */
-.food-card .food-img,
-.food-card .food-img1,
-.food-card .food-img2,
-.food-card .food-img3,
-.food-card .food-img4,
-.food-card .food-img5,
-.food-card .food-img6,
-.food-card .food-img7,
-.food-card .food-img8,
-.food-card .food-img9 {
+/* Image slots (generic). Backgrounds set from HTML via JS using data-img */
+.food-card .food-img {
   width: 100%;
-  aspect-ratio: 1 / 1; /* perfect square */
-  background-size: cover; /* fill without distortion */
+  aspect-ratio: 1 / 1;      /* Top picks: square */
+  background-size: cover;
   background-position: center;
   border-radius: 8px;
   margin-bottom: 10px;
-}
-
-/* Bind images (use your existing paths) */
-.food-img {
-  background-image: url("../assets/images/vegnoodles.jpg");
-}
-.food-img1 {
-  background-image: url("../assets/images/chickenbiryani.jpg");
-}
-.food-img2 {
-  background-image: url("../assets/images/pav-bhaji.jpg");
-}
-.food-img3 {
-  background-image: url("../assets/images/dahi-wada.jpg");
-}
-.food-img4 {
-  background-image: url("../assets/images/idli.jpg");
-}
-.food-img5 {
-  background-image: url("../assets/images/dosachutney.jpg");
-}
-.food-img6 {
-  background-image: url("../assets/images/Paneer\ Fried\ Rice.jpg");
-}
-.food-img7 {
-  background-image: url("../assets/images/vadasam.jpg");
-}
-.food-img8 {
-  background-image: url("../assets/images/vadapav.jpg");
-}
-.food-img9 {
-  background-image: url("../assets/images/paneerbiryani.jpg");
 }
 
 /* Chinese Grid (Swiggy-style) */
@@ -232,18 +189,19 @@ body {
 .food-grid-large .food-card {
   width: 100%;
   max-width: 360px;
-  text-align: left; /* like Swiggy */
-  padding: 0; /* image is full-bleed; move padding to content */
+  text-align: left;  /* like Swiggy */
+  padding: 0;        /* image is full-bleed; move padding to content */
   overflow: hidden;
 }
 
-/* Image area = first child div in card */
-.food-grid-large .food-card > div:first-child {
-  width: 100%;
-  height: 200px; /* banner height */
+/* Override image shape for Chinese grid (banner height) */
+.food-grid-large .food-card .food-img {
+  height: 200px;
+  aspect-ratio: auto;        /* disable square in this context */
   background-size: cover;
   background-position: center;
   border-radius: 12px 12px 0 0;
+  margin-bottom: 0;
 }
 
 /* Content padding inside Chinese cards */
@@ -255,39 +213,11 @@ body {
   margin-left: 15px;
   margin-right: 15px;
 }
-.food-grid-large .food-card h3 {
-  margin-top: 12px;
-  margin-bottom: 6px;
-}
+.food-grid-large .food-card h3 { margin-top: 12px; margin-bottom: 6px; }
 .food-grid-large .food-card .price,
 .food-grid-large .food-card .time,
-.food-grid-large .food-card .rating {
-  margin-bottom: 6px;
-}
-.food-grid-large .food-card .add-btn {
-  margin-top: 10px;
-  margin-bottom: 15px;
-}
-
-/* Chinese images binding */
-.food-img10 {
-  background-image: url("../assets/images/vegnoodles.jpg");
-}
-.food-img11 {
-  background-image: url("../assets/images/loginimagehc.png");
-}
-.food-img12 {
-  background-image: url("../assets/images/egg\ noodles.jpeg");
-}
-.food-img13 {
-  background-image: url("../assets/images/chicken\ manchurian.jpg");
-}
-.food-img14 {
-  background-image: url("../assets/images/chicken\ fried\ rice.jpg");
-}
-.food-img15 {
-  background-image: url("../assets/images/veg-fried-rice.jpg");
-}
+.food-grid-large .food-card .rating { margin-bottom: 6px; }
+.food-grid-large .food-card .add-btn { margin-top: 10px; margin-bottom: 15px; }
 
 /* Footer */
 .footer {
@@ -302,17 +232,9 @@ body {
   text-decoration: none;
   transition: color 0.3s ease;
 }
-.footer-links a:hover {
-  color: #00ff80;
-}
-.categories {
-  margin: 10px 0;
-  color: #aaa;
-}
-.footer p {
-  color: #888;
-  font-size: 0.9rem;
-}
+.footer-links a:hover { color: #00ff80; }
+.categories { margin: 10px 0; color: #aaa; }
+.footer p { color: #888; font-size: 0.9rem; }
 
 /* --------------------------------
    Responsive Media Queries
@@ -320,265 +242,64 @@ body {
 
 /* Tablets (<= 1024px) */
 @media (max-width: 1024px) {
-  .search-bar input {
-    width: 180px;
-  }
+  .search-bar input { width: 180px; }
 
   /* Chinese grid becomes 2 columns */
   .food-grid-large {
     grid-template-columns: repeat(2, 1fr);
   }
-
-  /* Better touch targets for tablets */
-  .add-btn {
-    padding: 12px 16px;
-    font-size: 1rem;
-    min-height: 44px;
-  }
-
-  .food-card {
-    padding: 20px;
-  }
 }
 
 /* Mobiles (<= 768px) */
 @media (max-width: 768px) {
-  /* Enhanced navbar for mobile with better spacing */
+  /* Navbar stacks */
   .navbar {
     flex-direction: column;
     align-items: stretch;
-    gap: 15px;
-    padding: 15px 20px;
+    gap: 10px;
   }
 
   .hamburger {
     display: block;
     margin-left: auto;
-    padding: 10px;
-    font-size: 1.8rem;
-    min-height: 44px;
-    min-width: 44px;
   }
 
   .search-bar {
     width: 100%;
     order: 3;
-    margin-right: 0;
   }
-
   .search-bar input {
     width: 100%;
-    padding: 12px 16px;
-    font-size: 16px; /* Prevents zoom on iOS */
-    min-height: 44px;
   }
 
   .nav-links {
-    display: none;
+    display: none;              /* hidden by default */
     flex-direction: column;
-    gap: 15px;
+    gap: 10px;
     width: 100%;
     background: #111;
-    padding: 15px;
+    padding: 10px;
     border-radius: 8px;
     order: 4;
   }
+  .nav-links.show { display: flex; }
 
-  .nav-links.show {
-    display: flex;
-  }
+  /* Top picks: smaller cards & tighter gaps */
+  .food-scroll { gap: 14px; }
+  .food-card { width: 180px; }
 
-  /* Better touch targets for navigation */
-  .nav-links a {
-    padding: 12px 16px;
-    border-radius: 8px;
-    min-height: 44px;
-    display: flex;
-    align-items: center;
-    font-size: 1.1rem;
-    transition: background 0.3s ease;
-  }
-
-  .nav-links a:hover {
-    background: #222;
-  }
-
-  /* Enhanced food sections for mobile */
-  .food-section,
-  .food-sec {
-    padding: 25px 15px;
-  }
-
-  .section-title,
-  .sec-tit {
-    font-size: 1.8rem;
-    margin-bottom: 20px;
-    text-align: center;
-  }
-
-  /* Improved horizontal scroll for mobile */
-  .food-scroll-wrapper {
-    padding: 15px 0;
-    margin: 0 -15px;
-  }
-
-  .food-scroll {
-    gap: 16px;
-    padding: 15px;
-    scroll-padding: 15px;
-  }
-
-  .food-card {
-    width: 200px;
-    padding: 20px;
-    min-height: 280px;
-  }
-
-  /* Better touch targets for buttons */
-  .add-btn {
-    padding: 12px 20px;
-    font-size: 1rem;
-    min-height: 44px;
-    border-radius: 25px;
-    margin-top: 15px;
-  }
-
-  /* Enhanced Chinese grid for mobile */
+  /* Chinese grid becomes 1 column */
   .food-grid-large {
     grid-template-columns: 1fr;
-    gap: 20px;
-    padding: 20px 0;
   }
 
-  .food-grid-large .food-card {
-    max-width: none;
-    margin: 0 auto;
-    width: 100%;
-  }
-
-  .food-grid-large .food-card > div:first-child {
-    height: 240px;
-  }
-
-  /* Better spacing for card content */
-  .food-grid-large .food-card h3 {
-    font-size: 1.2rem;
-    margin-top: 15px;
-    margin-bottom: 8px;
-  }
-
-  .food-grid-large .food-card .price,
-  .food-grid-large .food-card .time,
-  .food-grid-large .food-card .rating {
-    font-size: 1rem;
-    margin-bottom: 8px;
-  }
-
-  .food-grid-large .food-card .add-btn {
-    margin-top: 15px;
-    margin-bottom: 20px;
-    width: calc(100% - 30px);
-  }
-
-  /* Enhanced footer for mobile */
-  .footer {
-    padding: 30px 20px;
-  }
-
-  .footer-links {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    text-align: center;
-    margin-bottom: 20px;
-  }
-
-  .footer-links a {
-    padding: 10px;
-    font-size: 1.1rem;
-  }
-
-  .categories {
-    margin: 15px 0;
-    font-size: 1rem;
+  /* Larger banner for better feel on mobile (optional) */
+  .food-grid-large .food-card .food-img {
+    height: 220px;
   }
 }
 
-/* Enhanced very small phones support */
-@media (max-width: 480px) {
-  .navbar {
-    padding: 12px 15px;
-  }
-
-  .food-section,
-  .food-sec {
-    padding: 20px 10px;
-  }
-
-  .food-scroll {
-    padding: 15px 10px;
-  }
-
-  .food-card {
-    width: 180px;
-    padding: 15px;
-    min-height: 260px;
-  }
-
-  .section-title,
-  .sec-tit {
-    font-size: 1.6rem;
-  }
-
-  .food-grid-large .food-card > div:first-child {
-    height: 200px;
-  }
-}
-
-/* Touch-friendly improvements for all screen sizes */
-@media (hover: none) and (pointer: coarse) {
-  .food-card:hover {
-    transform: none;
-    box-shadow: 0 0 15px #00ff80;
-  }
-
-  .add-btn:hover {
-    background: #00ff80;
-  }
-
-  .nav-links a:hover {
-    background: #222;
-  }
-}
-
-/* Landscape orientation optimizations for mobile */
-@media (max-width: 768px) and (orientation: landscape) {
-  .navbar {
-    flex-direction: row;
-    padding: 10px 20px;
-  }
-
-  .search-bar {
-    order: 2;
-    width: auto;
-    flex: 1;
-    max-width: 300px;
-    margin: 0 20px;
-  }
-
-  .nav-links {
-    order: 3;
-    flex-direction: row;
-    width: auto;
-    background: transparent;
-    padding: 0;
-  }
-
-  .nav-links.show {
-    display: flex;
-  }
-
-  .hamburger {
-    display: none;
-  }
+/* Very small phones (<= 380px) */
+@media (max-width: 380px) {
+  .food-card { width: 160px; }
 }
