@@ -1,4 +1,4 @@
-/* home.js — VPP Canteen (stable modal add, no nav, robust IDs, absolute images, unique badge) */
+/* home.js — VPP Canteen (canonical IDs by name+price, enrich modal adds, unique-count badge) */
 (function () {
   // ------------------ Config ------------------
   const ITEM_PAGES_DIR = "html-files/food-items-files/"; // relative to index.html
@@ -23,17 +23,6 @@
     catch { return src || "/assets/images/food/placeholder.png"; }
   }
 
-  function basenameNoExt(url = "") {
-    try {
-      const u = new URL(url, document.baseURI);
-      const base = u.pathname.split("/").pop() || "";
-      return base.replace(/\.[a-z0-9]+$/i, "");
-    } catch {
-      const base = (url.split("/").pop() || "");
-      return base.replace(/\.[a-z0-9]+$/i, "");
-    }
-  }
-
   // ------------------ Storage ------------------
   function readCart() {
     try { return JSON.parse(localStorage.getItem(CART_KEY)) || []; }
@@ -42,11 +31,12 @@
   function writeCart(cart) {
     localStorage.setItem(CART_KEY, JSON.stringify(cart));
     updateCartBadge(cart);
+    window.dispatchEvent(new CustomEvent("vpp:cart-changed", { detail: { cart } }));
   }
 
-  // ------------------ Cart badge (UNIQUE items only) ------------------
+  // ------------------ Cart badge (UNIQUE items) ------------------
   function updateCartBadge(cart = readCart()) {
-    const cartBtn = $(".cart-btn");
+    const cartBtn = $(".cart-btn") || ($$(".header .nav .tab").find(t => (t.textContent||"").toLowerCase().includes("cart")));
     if (!cartBtn) return;
 
     let badge = cartBtn.querySelector(".cart-badge");
@@ -94,39 +84,7 @@
     }, duration);
   }
 
-  // ------------------ Cart ops ------------------
-  function addToCart(item) {
-    // Normalize minimal schema
-    const clean = {
-      id: String(item.id || ""),
-      name: String(item.name || "Item"),
-      price: Number(item.price || 0),
-      img: toAbsoluteURL(item.img || ""),
-      veg: !!item.veg,
-      meta: item.meta || "",
-      time: item.time || "",
-      desc: item.desc || "",
-    };
-
-    const cart = readCart();
-    const idx = cart.findIndex(x => x.id === clean.id);
-    if (idx >= 0) {
-      cart[idx].qty = Math.max(1, Number(cart[idx].qty || 1) + 1);
-      // backfill any missing fields
-      cart[idx].img  = cart[idx].img  || clean.img;
-      cart[idx].veg  = (cart[idx].veg ?? clean.veg) ?? false;
-      cart[idx].meta = cart[idx].meta || clean.meta;
-      cart[idx].time = cart[idx].time || clean.time;
-      cart[idx].desc = cart[idx].desc || clean.desc;
-    } else {
-      cart.push({ ...clean, qty: 1 });
-    }
-    writeCart(cart);
-    updateCartBadge(cart);
-    toast(`${clean.name} added • ${INR(clean.price)}`);
-  }
-
-  // ------------------ Item parsing from cards ------------------
+  // ------------------ Build canonical item from a grid card ------------------
   function getCardItem(card) {
     const title = $("h3", card)?.textContent?.trim() || "Item";
     const price = parsePrice($(".price", card)?.textContent || "0");
@@ -150,16 +108,83 @@
 
     const relOrAbs = fromData || fromImgTag || fromBg || `assets/images/${slugify(title)}.jpg`;
     const imgAbs = toAbsoluteURL(relOrAbs);
-    const imgBase = basenameNoExt(imgAbs);
 
-    // Prefer explicit data-id / data-sku; else stable fallback including price & image base
-    const cards = $$(".food-card");
-    const index = Math.max(0, cards.indexOf(card));
-    const dataId = card.getAttribute("data-id") || card.getAttribute("data-sku");
-    const fallbackId = `${slugify(title)}--${price}--${index}--${imgBase}`;
-    const id = (dataId && String(dataId).trim()) || fallbackId;
+    return { name: title, price, img: imgAbs, veg, meta, time, desc };
+  }
 
-    return { id, name: title, price, img: imgAbs, veg, meta, time, desc };
+  // Find the grid card by item name and enrich missing fields
+  function enrichFromGrid(partial) {
+    const name = partial?.name?.trim() || "";
+    if (!name) return partial;
+
+    const card = $$(".food-card").find(c => ($("h3", c)?.textContent?.trim() || "").toLowerCase() === name.toLowerCase());
+    if (!card) return partial;
+
+    const fromCard = getCardItem(card);
+    return {
+      ...fromCard,
+      // if partial provided something explicit, keep it
+      name: partial.name ?? fromCard.name,
+      price: Number(partial.price ?? fromCard.price),
+      img: partial.img || fromCard.img,
+      veg: (partial.veg !== undefined) ? !!partial.veg : fromCard.veg,
+      meta: partial.meta || fromCard.meta,
+      time: partial.time || fromCard.time,
+      desc: partial.desc || fromCard.desc,
+    };
+  }
+
+  // Canonicalize (ID = name+price ONLY, so modal + card merges)
+  function canonicalize(itemLike) {
+    const base = {
+      name: String(itemLike?.name || "Item"),
+      price: Number(itemLike?.price || 0),
+      img: toAbsoluteURL(itemLike?.img || ""),
+      veg: itemLike?.veg === undefined ? undefined : !!itemLike.veg,
+      meta: itemLike?.meta || "",
+      time: itemLike?.time || "",
+      desc: itemLike?.desc || "",
+    };
+
+    // If fields are missing (typical from iframe), enrich from visible grid
+    const enriched = (base.veg === undefined || !base.img || !base.meta || !base.time || !base.desc)
+      ? enrichFromGrid(base)
+      : base;
+
+    const id = `${slugify(enriched.name)}--${Number(enriched.price || 0)}`;
+
+    return {
+      id,
+      name: enriched.name,
+      price: Number(enriched.price || 0),
+      img: toAbsoluteURL(enriched.img || ""),
+      veg: enriched.veg === undefined ? false : !!enriched.veg,
+      meta: enriched.meta || "",
+      time: enriched.time || "",
+      desc: enriched.desc || "",
+    };
+  }
+
+  // ------------------ Cart ops ------------------
+  function addToCart(itemLike) {
+    const clean = canonicalize(itemLike);
+
+    // Merge by canonical id (name+price)
+    const cart = readCart();
+    const idx = cart.findIndex(x => x.id === clean.id);
+    if (idx >= 0) {
+      // bump qty and fill any missing fields
+      cart[idx].qty = Math.max(1, Number(cart[idx].qty || 1) + 1);
+      cart[idx].img  = cart[idx].img  || clean.img;
+      cart[idx].veg  = (cart[idx].veg ?? clean.veg) ?? false;
+      cart[idx].meta = cart[idx].meta || clean.meta;
+      cart[idx].time = cart[idx].time || clean.time;
+      cart[idx].desc = cart[idx].desc || clean.desc;
+    } else {
+      cart.push({ ...clean, qty: 1 });
+    }
+    writeCart(cart);
+    toast(`${clean.name} added • ${INR(clean.price)}`);
   }
 
   // ------------------ Modal (iframe) ------------------
@@ -222,11 +247,11 @@
         e.stopPropagation();
         const card = addBtn.closest(".food-card");
         if (!card) return;
-        addToCart(getCardItem(card)); // no navigation, shows toast, updates badge
+        addToCart(getCardItem(card));
         return;
       }
 
-      // Open detail modal when clicking card (but not the Add button)
+      // Open detail modal when clicking card (but not Add button)
       const card = e.target.closest(".food-card");
       if (card && !e.target.closest(".add-btn")) {
         const name = $("h3", card)?.textContent?.trim() || "item";
@@ -257,25 +282,25 @@
     });
   }
 
-  // ------------------ Same-origin postMessage bridge from item pages ------------------
+  // ------------------ Same-origin postMessage bridge ------------------
   function wirePostMessageBridge() {
+    const frameEl = () => document.getElementById("mi-frame");
+
     window.addEventListener("message", (event) => {
-      // Only accept messages from the same origin
-      try {
-        const sameOrigin = new URL(event.origin).origin === new URL(document.baseURI).origin;
-        if (!sameOrigin) return;
-      } catch {
-        // Be strict: ignore if anything looks off
-        return;
-      }
+      const frame = frameEl();
+      if (frame && event.source !== frame.contentWindow) return;
+
+      let sameOrigin = false;
+      try { sameOrigin = new URL(event.origin).origin === new URL(document.baseURI).origin; } catch {}
+      const isLocal = (location.origin === "null" || event.origin === "null");
+      if (!sameOrigin && !isLocal) return;
 
       const data = event.data;
       if (!data || typeof data !== "object") return;
 
-      // Supported message: { type: 'VPP_ADD_TO_CART', item: {id,name,price,img,veg,meta,time,desc} }
       if (data.type === "VPP_ADD_TO_CART" && data.item) {
-        addToCart(data.item);            // updates badge + toast
-        // Keep modal open (Option A) — do not close.
+        // Enrich + canonicalize so veg/meta/time/rating are correct
+        addToCart(data.item);
       }
     });
   }
@@ -371,7 +396,7 @@
     });
   }
 
-  // ------------------ Image hydration (backgrounds from data-img) ------------------
+  // ------------------ Image hydration ------------------
   function hydrateCardImages() {
     $$(".food-card .food-img").forEach(el => {
       const src = el.dataset.img;
@@ -386,7 +411,7 @@
     wireChineseCarousel();
     wireHamburger();
     wirePostMessageBridge();
-    updateCartBadge(); // show unique-item badge on load
+    updateCartBadge(); // show unique-count badge on load
   }
 
   if (document.readyState === "loading") {
