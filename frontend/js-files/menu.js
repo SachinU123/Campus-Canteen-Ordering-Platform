@@ -1,73 +1,105 @@
-// menu.js — VPP Canteen (clean, robust, single-source-of-truth)
+// menu.js — VPP Canteen (robust, single-source-of-truth, a11y-friendly)
 (() => {
   "use strict";
 
   // -------------------- Constants & tiny utils --------------------
-  const CART_KEY = "vpp_canteen_cart";
-  const CURRENCY = "₹";
+  const CART_KEY  = "vpp_canteen_cart";
+  const CURRENCY  = "₹";
   const BADGE_MAX = 99;
 
   const $  = (sel, ctx = document) => ctx.querySelector(sel);
   const $$ = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
   const num = (t) => Number(String(t ?? "").replace(/[^\d.]/g, "")) || 0;
-  const slug = (s = "") => s.toLowerCase().trim().replace(/\s+/g, "-").replace(/[^a-z0-9\-]/g, "");
+
+  const slug = (s = "") =>
+    s.toLowerCase().trim().replace(/\s+/g, "-").replace(/[^a-z0-9\-]/g, "");
 
   const INR = (n) => `${CURRENCY}${Number(n || 0).toFixed(0)}`;
-  const safeId = (name, price, img = "") => {
+
+  // ID must be stable & unique across menu pages; include name, price, and a tail
+  const safeId = (name, price, img = "", extra = "") => {
     const tail = (img.split("/").pop() || "").replace(/\.[a-z0-9]+$/i, "");
-    return `${slug(name || "item")}--${Number(price || 0)}${tail ? `--${slug(tail)}` : ""}`;
+    const base = `${slug(name || "item")}--${Number(price || 0)}`;
+    const parts = [base];
+    if (tail) parts.push(slug(tail));
+    if (extra) parts.push(slug(extra));
+    return parts.join("--");
   };
 
   // -------------------- Cart (single source of truth) --------------------
   function readCart() {
-    try { return JSON.parse(localStorage.getItem(CART_KEY)) || []; }
-    catch { return []; }
+    try {
+      const parsed = JSON.parse(localStorage.getItem(CART_KEY));
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
   }
+
   function writeCart(cart) {
     localStorage.setItem(CART_KEY, JSON.stringify(cart));
     updateBadge(cart);
   }
+
+  // Total quantity across all items
   function totalQty(cart = readCart()) {
     return cart.reduce((s, it) => s + (it.qty || 0), 0);
   }
+
+  // Count of unique line items
+  function uniqueCount(cart = readCart()) {
+    return cart.length;
+  }
+
   function addToCart(item, qty = 1) {
     const cart = readCart();
     const idx = cart.findIndex((x) => x.id === item.id);
-    if (idx >= 0) cart[idx].qty += qty;
-    else cart.push({ ...item, qty });
+
+    if (idx >= 0) {
+      cart[idx].qty = Math.max(1, (cart[idx].qty || 0) + qty);
+    } else {
+      cart.push({ ...item, qty: Math.max(1, qty || 1) });
+    }
+
     writeCart(cart);
     toast(`${item.name} added to cart`);
   }
 
   // -------------------- Header routing --------------------
   function wireHeader() {
-    // Robust: detect by text OR data-tab attribute
-    document.addEventListener("click", (e) => {
-      const tab = e.target.closest(".header .nav .tab, .brand, a[data-tab]");
-      if (!tab) return;
-      const dataTab = tab.getAttribute("data-tab")?.toLowerCase();
-      const txt = (tab.textContent || "").trim().toLowerCase();
-      const key = dataTab || txt;
+    document.addEventListener(
+      "click",
+      (e) => {
+        const tab = e.target.closest(".header .nav .tab, .brand, a[data-tab]");
+        if (!tab) return;
+        e.preventDefault();
 
-      e.preventDefault();
-      if (key.startsWith("index") || key.includes("home"))      location.href = "../index.html";
-      else if (key.startsWith("menu"))                          location.href = "menu.html";
-      else if (key.startsWith("orders"))                        location.href = "orders.html";
-      else if (key.startsWith("cart"))                          location.href = "cart.html";
-      else                                                      location.href = "../index.html";
-    }, { passive: true });
+        const dataTab = tab.getAttribute("data-tab")?.toLowerCase();
+        const txt = (tab.textContent || "").trim().toLowerCase();
+        const key = dataTab || txt;
+
+        if (key.startsWith("index") || key.includes("home")) location.href = "../index.html";
+        else if (key.startsWith("menu"))                    location.href = "menu.html";
+        else if (key.startsWith("orders"))                  location.href = "orders.html";
+        else if (key.startsWith("cart"))                    location.href = "cart.html";
+        else                                                location.href = "../index.html";
+      },
+      { passive: true }
+    );
   }
 
-  // -------------------- Badge (always correct, always visible) --------------------
+  // -------------------- Badge (unique items; tooltip shows qty) --------------------
   function findCartTab() {
     // Prefer explicit data attribute
     let tab = $('.nav .tab[data-tab="cart"]');
     if (tab) return tab;
-    // Then try common href to cart.html
-    tab = Array.from($$('.nav .tab')).find(t => (t.getAttribute("href") || "").includes("cart.html"));
+
+    // Try common href to cart.html
+    tab = $$('.nav .tab').find((t) => (t.getAttribute("href") || "").includes("cart.html"));
     if (tab) return tab;
-    // Finally, fall back to text contains "cart"
-    return Array.from($$('.nav .tab')).find(t => (t.textContent || "").toLowerCase().includes("cart")) || null;
+
+    // Fallback to text contains "cart"
+    return $$('.nav .tab').find((t) => (t.textContent || "").toLowerCase().includes("cart")) || null;
   }
 
   function ensureCartBadge() {
@@ -78,7 +110,8 @@
     if (!badge) {
       badge = document.createElement("span");
       badge.className = "badge";
-      badge.style.cssText = "margin-left:6px; min-width:18px; padding:0 6px; border-radius:10px; font-size:12px; line-height:18px; text-align:center; background:#111827; color:#fff; display:inline-block; visibility:hidden;";
+      badge.style.cssText =
+        "margin-left:6px; min-width:18px; padding:0 6px; border-radius:10px; font-size:12px; line-height:18px; text-align:center; background:#111827; color:#fff; display:inline-block; visibility:hidden;";
       tab.appendChild(badge);
     }
     return badge;
@@ -86,10 +119,18 @@
 
   function updateBadge(cart = readCart()) {
     const badge = ensureCartBadge();
-    if (!badge) return;
-    const n = totalQty(cart);
-    badge.textContent = n > BADGE_MAX ? `${BADGE_MAX}+` : String(n);
-    badge.style.visibility = n ? "visible" : "hidden";
+    const tab = findCartTab();
+    if (!badge || !tab) return;
+
+    const uniques = uniqueCount(cart);
+    const qty = totalQty(cart);
+
+    badge.textContent = uniques > BADGE_MAX ? `${BADGE_MAX}+` : String(uniques);
+    badge.style.visibility = uniques ? "visible" : "hidden";
+
+    const label = `Cart: ${uniques} unique item${uniques === 1 ? "" : "s"} (${qty} total)`;
+    badge.setAttribute("aria-label", label);
+    tab.setAttribute("title", label);
   }
 
   // Keep badge in sync across tabs/pages
@@ -115,6 +156,7 @@
     }
     return host;
   }
+
   function toast(msg, ms = 1400) {
     const host = ensureToastHost();
     const el = document.createElement("div");
@@ -122,8 +164,15 @@
     el.style.cssText =
       "background:#111827;color:#fff;padding:10px 14px;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.25);font-size:14px;opacity:0;transition:opacity .2s, transform .2s;transform:translateY(10px)";
     host.appendChild(el);
-    requestAnimationFrame(() => { el.style.opacity = "1"; el.style.transform = "translateY(0)"; });
-    setTimeout(() => { el.style.opacity = "0"; el.style.transform = "translateY(10px)"; setTimeout(() => el.remove(), 200); }, ms);
+    requestAnimationFrame(() => {
+      el.style.opacity = "1";
+      el.style.transform = "translateY(0)";
+    });
+    setTimeout(() => {
+      el.style.opacity = "0";
+      el.style.transform = "translateY(10px)";
+      setTimeout(() => el.remove(), 200);
+    }, ms);
   }
 
   // -------------------- Modal (detail inside iframe) --------------------
@@ -156,10 +205,13 @@
     `;
     document.body.appendChild(modal);
 
-    modal.addEventListener("click", (e) => { if (e.target === modal) hideModal(); });
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) hideModal();
+    });
     modal.querySelector("#mi-close").addEventListener("click", hideModal);
     return modal;
   }
+
   function showDetailInModal(url) {
     const modal = ensureModal();
     const frame = modal.querySelector("#mi-frame");
@@ -168,6 +220,7 @@
     modal.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";
   }
+
   function hideModal() {
     const modal = $("#menu-item-modal");
     if (!modal) return;
@@ -188,20 +241,24 @@
     const setAria = () => right.setAttribute("aria-hidden", (!flipped).toString());
     setAria();
 
-    book.addEventListener("click", (e) => {
-      if (e.target.closest("button, a, [data-action]")) return;
-      const rect = book.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const half = rect.width / 2;
-      if (!flipped && x > half) {
-        right.classList.add("flipped");
-        flipped = true;
-      } else if (flipped && x < half) {
-        right.classList.remove("flipped");
-        flipped = false;
-      }
-      setAria();
-    }, { passive: true });
+    book.addEventListener(
+      "click",
+      (e) => {
+        if (e.target.closest("button, a, [data-action]")) return;
+        const rect = book.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const half = rect.width / 2;
+        if (!flipped && x > half) {
+          right.classList.add("flipped");
+          flipped = true;
+        } else if (flipped && x < half) {
+          right.classList.remove("flipped");
+          flipped = false;
+        }
+        setAria();
+      },
+      { passive: true }
+    );
   }
 
   // -------------------- Filters --------------------
@@ -224,29 +281,35 @@
       });
     }
 
-    filters.addEventListener("click", (e) => {
-      const btn = e.target.closest(".chip");
-      if (!btn) return;
-      apply(btn.dataset.filter);
-    }, { passive: true });
+    filters.addEventListener(
+      "click",
+      (e) => {
+        const btn = e.target.closest(".chip");
+        if (!btn) return;
+        apply(btn.dataset.filter);
+      },
+      { passive: true }
+    );
 
     apply("all");
   }
 
   // -------------------- Extract item data robustly --------------------
-  function getItemDataFrom(el) {
-    // Priority: data-* attributes on container or button
-    const container = el.closest(".menu-item") || el;
+  function getItemDataFrom(targetEl) {
+    const container = targetEl.closest(".menu-item") || targetEl;
     const ds = container.dataset || {};
 
-    const name  = ds.name  || (container.querySelector(".name")?.textContent || "").trim();
+    const name  = (ds.name ?? container.querySelector(".name")?.textContent ?? "").trim();
     const price = num(ds.price ?? container.querySelector(".price")?.textContent ?? 0);
     const imgEl = container.querySelector("img");
     const img   = ds.img || (imgEl ? imgEl.getAttribute("src") || "" : "");
-    const veg   = (ds.veg ?? (container.classList.contains("veg") ? "veg" :
-                 container.classList.contains("non-veg") ? "non-veg" : ""));
+    const veg   = ds.veg ?? (container.classList.contains("veg") ? "veg" :
+                              container.classList.contains("non-veg") ? "non-veg" : "");
 
-    const id = ds.id || safeId(name, price, img);
+    // Add a tiny extra discriminator from DOM (like a data-sku or index) to avoid rare collisions
+    const extra = ds.sku || ds.id || container.getAttribute("id") || "";
+
+    const id = ds.id || safeId(name, price, img, extra);
 
     return {
       id,
@@ -259,10 +322,11 @@
 
   // -------------------- Menu interactions --------------------
   function wireMenu() {
-    // Open detail page inside modal on clicking the card (but not on add buttons)
+    // Open detail page inside modal on card click (not on add/controls)
     document.addEventListener("click", (e) => {
       const card = e.target.closest(".menu-item");
       if (!card) return;
+
       // If click was on an actionable control, don't open modal
       if (e.target.closest(".add, .add-to-cart, [data-action='add-to-cart'], button, .qty, .price")) return;
 
@@ -277,7 +341,10 @@
       const btn = e.target.closest(".add, .add-to-cart, [data-action='add-to-cart']");
       if (!btn) return;
 
+      // Prevent the card click from also firing (which could open modal inadvertently)
       e.preventDefault();
+      e.stopPropagation();
+
       const data = getItemDataFrom(btn);
       if (!data.price || !data.name) {
         toast("Unable to add this item (missing name/price)");
@@ -286,7 +353,7 @@
       addToCart(data, 1);
     });
 
-    // Keyboard accessibility: Enter/Space on .menu-item triggers modal
+    // Keyboard: Enter/Space on .menu-item triggers modal
     document.addEventListener("keydown", (e) => {
       const el = e.target;
       if (!el || !el.classList || !el.classList.contains("menu-item")) return;
@@ -307,13 +374,16 @@
 
     wireHeader();
     wireBadgeSync();
-    updateBadge();      // ensure visible immediately
+    updateBadge(); // render badge immediately
 
     wireFlip();
     wireFilters();
     wireMenu();
   }
 
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
-  else init();
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
 })();

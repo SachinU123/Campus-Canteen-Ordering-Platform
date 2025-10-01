@@ -28,7 +28,7 @@
       </a>
 
       <nav class="nav" aria-label="Primary">
-        <a class="tab" href="/">Home</a>
+        <a class="tab" href="../index.html">Home</a>
         <a class="tab active" href="menu.html">Menu</a>
         <a class="tab" href="orders.html">Orders</a>
         <a class="tab" href="cart.html">Cart <span class="badge">3</span></a>
@@ -124,66 +124,5 @@
       <div>© 2025 VPP Canteen</div>
     </div>
   </footer>
-
-  <script>
-    // ===== Flip logic (fixed to avoid inline handlers) =====
-    (function(){
-      const book = document.getElementById('book');
-      const right = document.getElementById('page-right');
-      let flipped = false;
-
-      function setAria(){
-        right.setAttribute('aria-hidden', (!flipped).toString());
-      }
-      setAria();
-
-      book.addEventListener('click', (e) => {
-        // Ignore clicks on links/buttons
-        if ((e.target.closest('button') || e.target.closest('a'))) return;
-
-        const rect = book.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const half = rect.width / 2;
-
-        if (!flipped && x > half) {
-          right.classList.add('flipped');
-          flipped = true;
-          setAria();
-        } else if (flipped && x < half) {
-          right.classList.remove('flipped');
-          flipped = false;
-          setAria();
-        }
-      });
-    })();
-
-    // ===== Filters (fixed: no global 'event' usage) =====
-    (function(){
-      const filters = document.getElementById('filters');
-      const chips = Array.from(filters.querySelectorAll('.chip'));
-      const items = Array.from(document.querySelectorAll('.menu-item'));
-
-      function apply(filter){
-        chips.forEach(c=>{
-          const active = c.dataset.filter === filter || (filter==='all' && c.dataset.filter==='all');
-          c.classList.toggle('active', c.dataset.filter === filter);
-          c.setAttribute('aria-selected', c.classList.contains('active') ? 'true' : 'false');
-        });
-        items.forEach(el=>{
-          const show = filter==='all' || el.classList.contains(filter);
-          el.style.display = show ? 'flex' : 'none';
-        });
-      }
-
-      filters.addEventListener('click', (e)=>{
-        const btn = e.target.closest('.chip');
-        if (!btn) return;
-        apply(btn.dataset.filter);
-      });
-
-      // default
-      apply('all');
-    })();
-  </script>
 </body>
 </html>
